@@ -6,6 +6,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.layout.HBox;
@@ -14,27 +15,32 @@ import javafx.scene.text.Text;
 public class Login {
     private final GridPane grid;
     private Runnable signupAction;
+    private Runnable loginAction;
 
     public Login() {
 
         Label header = new Label("Login");
-        header.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
+        header.setFont(Font.font("Tahoma", FontWeight.BOLD, 20));
 
-        Label unameLabel = new Label("Username: ");
-        unameLabel.setPrefWidth(100);
-        TextField username = new TextField();
-        username.setPrefWidth(200);
+        Label emailLabel = new Label("Email: ");
+        emailLabel.setPrefWidth(80);
+        TextField email = new TextField();
+        email.setPrefWidth(200);
 
         Label passLabel = new Label("Password: ");
-        passLabel.setPrefWidth(100);
+        passLabel.setPrefWidth(80);
         PasswordField password = new PasswordField();
         password.setPrefWidth(200);
 
         Button loginBtn = new Button("Login");
         loginBtn.setMinWidth(80);
 
+        Label error = new Label("Fields should not be empty");
+        error.setTextFill(Color.RED);
+        error.setVisible(false);
+
         Label signUpLabel = new Label("If you are a new applicant, please register: ");
-        Button signUpBtn = new Button("SignUp");
+        Button signUpBtn = new Button("Sign Up");
 
         HBox row1 = new HBox();
         row1.setSpacing(10);
@@ -54,11 +60,16 @@ public class Login {
         row5.setSpacing(10);
         row5.setAlignment(Pos.CENTER);
 
+        HBox row6 = new HBox();
+        row6.setSpacing(10);
+        row6.setAlignment(Pos.CENTER);
+
         row1.getChildren().addAll(header);
-        row2.getChildren().addAll(unameLabel, username);
+        row2.getChildren().addAll(emailLabel, email);
         row3.getChildren().addAll(passLabel, password);
         row4.getChildren().addAll(loginBtn);
-        row5.getChildren().addAll(signUpLabel, signUpBtn);
+        row5.getChildren().addAll(error);
+        row6.getChildren().addAll(signUpLabel, signUpBtn);
 
         grid = new GridPane();
         grid.setAlignment(javafx.geometry.Pos.CENTER);
@@ -71,8 +82,15 @@ public class Login {
         grid.add(row3,0,2);
         grid.add(row4,0,3);
         grid.add(row5,0,4);
+        grid.add(row6,0,5);
 
         loginBtn.setOnAction(event -> {
+            if (email.getText().isEmpty() || password.getText().isEmpty())
+                error.setVisible(true);
+            else if (loginAction != null) {
+                error.setVisible(false);
+                loginAction.run();
+            }
         });
 
         signUpBtn.setOnAction(actionEvent -> {
@@ -88,5 +106,9 @@ public class Login {
 
     public void setSignupAction(Runnable signupAction) {
         this.signupAction = signupAction;
+    }
+
+    public void setLoginAction(Runnable loginAction) {
+        this.loginAction = loginAction;
     }
 }

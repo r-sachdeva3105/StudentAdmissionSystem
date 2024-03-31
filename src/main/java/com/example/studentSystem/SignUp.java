@@ -5,42 +5,48 @@ import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
 public class SignUp {
     private final GridPane grid;
-    private Runnable signupAction;
+    private Runnable loginAction;
+    private Runnable registrationAction;
 
     public SignUp() {
 
-        Label header = new Label("Signup");
-        header.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
+        Label header = new Label("Sign Up");
+        header.setFont(Font.font("Tahoma", FontWeight.BOLD, 20));
 
         Label nameLabel = new Label("Name: ");
-        nameLabel.setPrefWidth(100);
+        nameLabel.setPrefWidth(120);
         TextField name = new TextField();
         name.setPrefWidth(200);
 
         Label emailLabel = new Label("Email: ");
-        emailLabel.setPrefWidth(100);
+        emailLabel.setPrefWidth(120);
         TextField email = new TextField();
         email.setPrefWidth(200);
 
         Label passLabel = new Label("Password: ");
-        passLabel.setPrefWidth(100);
+        passLabel.setPrefWidth(120);
         PasswordField password = new PasswordField();
         password.setPrefWidth(200);
 
         Label rePassLabel = new Label("Re-enter Password: ");
-        rePassLabel.setPrefWidth(100);
+        rePassLabel.setPrefWidth(120);
         PasswordField rePass = new PasswordField();
         rePass.setPrefWidth(200);
 
         CheckBox termsCheck = new CheckBox("I agree to the terms and conditions");
 
-        Button signupBtn = new Button("Signup");
+        Button signupBtn = new Button("Sign Up");
         signupBtn.setMinWidth(80);
+
+        Label error = new Label("Fields should not be empty");
+        error.setTextFill(Color.RED);
+        error.setVisible(false);
 
         Label loginLabel = new Label("If you already have account, please login: ");
         Button loginBtn = new Button("Login");
@@ -73,6 +79,10 @@ public class SignUp {
         row8.setSpacing(10);
         row8.setAlignment(Pos.CENTER);
 
+        HBox row9 = new HBox();
+        row9.setSpacing(10);
+        row9.setAlignment(Pos.CENTER);
+
         row1.getChildren().addAll(header);
         row2.getChildren().addAll(nameLabel, name);
         row3.getChildren().addAll(emailLabel, email);
@@ -80,7 +90,8 @@ public class SignUp {
         row5.getChildren().addAll(rePassLabel, rePass);
         row6.getChildren().addAll(termsCheck);
         row7.getChildren().addAll(signupBtn);
-        row8.getChildren().addAll(loginLabel, loginBtn);
+        row8.getChildren().addAll(error);
+        row9.getChildren().addAll(loginLabel, loginBtn);
 
         grid = new GridPane();
         grid.setAlignment(javafx.geometry.Pos.CENTER);
@@ -96,13 +107,25 @@ public class SignUp {
         grid.add(row6,0,5);
         grid.add(row7,0,6);
         grid.add(row8,0,7);
+        grid.add(row9,0,8);
 
-        signupBtn.setOnAction(event -> {
+        signupBtn.setOnAction(actionEvent -> {
+            if (name.getText().isEmpty() || email.getText().isEmpty() || password.getText().isEmpty() || rePass.getText().isEmpty() || !termsCheck.isSelected())
+                error.setVisible(true);
+            else if (!password.getText().equals(rePass.getText())) {
+                error.setText("Password Mismatch");
+                error.setVisible(true);
+            }
+            else
+                error.setVisible(false);
+                if (registrationAction != null) {
+                    registrationAction.run();
+                }
         });
 
         loginBtn.setOnAction(actionEvent -> {
-            if (signupAction != null) {
-                signupAction.run();
+            if (loginAction != null) {
+                loginAction.run();
             }
         });
     }
@@ -111,7 +134,10 @@ public class SignUp {
         return grid;
     }
 
-    public void setSignupAction(Runnable signupAction) {
-        this.signupAction = signupAction;
+    public void setLoginAction(Runnable loginAction) {
+        this.loginAction = loginAction;
+    }
+    public void setRegistrationAction(Runnable registrationAction) {
+        this.registrationAction = registrationAction;
     }
 }

@@ -13,25 +13,41 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         this.stage = stage;
+        stage.setTitle("Student Admission System");
         showLoginPage();
     }
 
     private void showLoginPage() {
-        stage.setTitle("Login Page");
         Login login = new Login();
-        Scene scene = new Scene(login.getView(), 500, 300);
+        Scene scene = new Scene(login.getView());
         stage.setScene(scene);
         stage.show();
-        login.setSignupAction(() -> showSignupPage());
+        login.setSignupAction(this::showSignupPage);
+        login.setLoginAction(this::showRegistrarDashboardPage);
     }
 
     private void showSignupPage() {
-        stage.setTitle("Signup Page");
         SignUp signup = new SignUp();
-        Scene scene = new Scene(signup.getView(), 500, 300);
+        Scene scene = new Scene(signup.getView());
         stage.setScene(scene);
         stage.show();
-        signup.setSignupAction(() -> showLoginPage());
+        signup.setLoginAction(this::showLoginPage);
+        signup.setRegistrationAction(this::showRegistrationPage);
+    }
+
+    private void showRegistrationPage() {
+        Registration registration = new Registration();
+        Scene scene = new Scene(registration.getView());
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    private void showRegistrarDashboardPage() {
+        RegistrarDashboard registrar = new RegistrarDashboard();
+        Scene scene = new Scene(registrar.getView());
+        stage.setScene(scene);
+        stage.show();
+        registrar.setLogoutAction(this::showLoginPage);
     }
 
     public static void main(String[] args) {
