@@ -12,12 +12,17 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 
+import java.sql.Connection;
+
 public class Login {
     private final GridPane grid;
+    private Connection connection;
     private Runnable signupAction;
     private Runnable loginAction;
 
-    public Login() {
+    public Login(Connection connection) {
+
+        this.connection = connection;
 
         Label header = new Label("Login");
         header.setFont(Font.font("Tahoma", FontWeight.BOLD, 20));
