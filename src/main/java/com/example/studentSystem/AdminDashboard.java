@@ -1,6 +1,7 @@
 package com.example.studentSystem;
 
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -9,19 +10,23 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 
-public class RegistrarDashboard {
-
+public class AdminDashboard {
     private final GridPane grid;
     private Runnable logoutAction;
 
-    public RegistrarDashboard() {
+    public AdminDashboard() {
 
-        Label header = new Label("Hi, Registrar");
+        Label header = new Label("Hi, Admin");
         header.setFont(Font.font("Tahoma", FontWeight.BOLD, 20));
         header.setMaxWidth(Double.MAX_VALUE);
 
         Button logoutBtn = new Button("Logout");
         logoutBtn.setMinWidth(80);
+
+        ChoiceBox<String> filter = new ChoiceBox<>();
+        filter.getItems().addAll("All", "Registrars", "Applicants");
+        filter.setValue("All");
+        filter.setPrefWidth(100);
 
         TableView<Applicant> applicantView = new TableView<>();
         applicantView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
@@ -42,12 +47,22 @@ public class RegistrarDashboard {
         applicantView.getColumns().addAll(idColumn, nameColumn, phoneColumn, emailColumn);
 
         Label program1Label = new Label("Program 1:");
+        program1Label.setPrefWidth(100);
+
         Label program2Label = new Label("Program 2:");
+        program2Label.setPrefWidth(100);
+
         Label program3Label = new Label("Program 3:");
+        program3Label.setPrefWidth(100);
 
         Text program1 = new Text("Program 1");
+        program1.setWrappingWidth(100);
+
         Text program2 = new Text("Program 2");
+        program2.setWrappingWidth(100);
+
         Text program3 = new Text("Program 3");
+        program3.setWrappingWidth(100);
 
         Button updateBtn = new Button("Update");
         updateBtn.setMinWidth(80);
@@ -68,6 +83,12 @@ public class RegistrarDashboard {
         Button submitBtn = new Button("Submit");
         submitBtn.setMinWidth(80);
 
+        Button addApplicantBtn = new Button("Add Applicant");
+        addApplicantBtn.setMinWidth(80);
+
+        Button addRegistrarBtn = new Button("Add Registrar");
+        addRegistrarBtn.setMinWidth(80);
+
         HBox row1 = new HBox();
         row1.setSpacing(10);
         HBox.setHgrow(header, Priority.ALWAYS);
@@ -75,10 +96,10 @@ public class RegistrarDashboard {
 
         HBox row2 = new HBox();
         row2.setSpacing(10);
-        HBox.setHgrow(applicantView, Priority.ALWAYS);
 
         HBox row3 = new HBox();
         row3.setSpacing(10);
+        HBox.setHgrow(applicantView, Priority.ALWAYS);
 
         HBox row4 = new HBox();
         row4.setSpacing(10);
@@ -89,12 +110,20 @@ public class RegistrarDashboard {
         HBox row6 = new HBox();
         row6.setSpacing(10);
 
+        HBox row7 = new HBox();
+        row7.setSpacing(10);
+
+        HBox row8 = new HBox();
+        row8.setSpacing(10);
+
         row1.getChildren().addAll(header, logoutBtn);
-        row2.getChildren().addAll(applicantView);
-        row3.getChildren().addAll(program1Label, program2Label, program3Label);
-        row4.getChildren().addAll(program1, program2, program3);
-        row5.getChildren().addAll(updateBtn, deleteBtn,addBtn,reportBtn);
-        row6.getChildren().addAll(status, submitBtn);
+        row2.getChildren().addAll(filter);
+        row3.getChildren().addAll(applicantView);
+        row4.getChildren().addAll(program1Label, program2Label, program3Label);
+        row5.getChildren().addAll(program1, program2, program3);
+        row6.getChildren().addAll(updateBtn, deleteBtn,addBtn,reportBtn);
+        row7.getChildren().addAll(status, submitBtn);
+        row8.getChildren().addAll(addApplicantBtn, addRegistrarBtn);
 
         grid = new GridPane();
         grid.setAlignment(javafx.geometry.Pos.CENTER);
@@ -108,6 +137,8 @@ public class RegistrarDashboard {
         grid.add(row4,0,3);
         grid.add(row5,0,4);
         grid.add(row6,0,5);
+        grid.add(row7,0,6);
+        grid.add(row8,0,7);
 
         logoutBtn.setOnAction(actionEvent -> {
             if (logoutAction != null) {

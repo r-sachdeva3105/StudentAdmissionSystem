@@ -23,7 +23,7 @@ public class Main extends Application {
         stage.setScene(scene);
         stage.show();
         login.setSignupAction(this::showSignupPage);
-        login.setLoginAction(this::showRegistrarDashboardPage);
+        login.setLoginAction(this::showAdminDashboardPage);
     }
 
     private void showSignupPage() {
@@ -48,6 +48,14 @@ public class Main extends Application {
         stage.setScene(scene);
         stage.show();
         registrar.setLogoutAction(this::showLoginPage);
+    }
+
+    private void showAdminDashboardPage() {
+        AdminDashboard admin = new AdminDashboard();
+        Scene scene = new Scene(admin.getView());
+        stage.setScene(scene);
+        stage.show();
+        admin.setLogoutAction(this::showLoginPage);
     }
 
     public static void main(String[] args) {
