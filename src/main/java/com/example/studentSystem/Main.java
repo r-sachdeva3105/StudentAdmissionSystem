@@ -11,8 +11,8 @@ import java.sql.SQLException;
 
 public class Main extends Application {
 
-    private Stage stage;
-    private Connection connection;
+    private static Stage stage;
+    private static Connection connection;
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -26,22 +26,31 @@ public class Main extends Application {
         }
     }
 
-    private void showLoginPage() {
+    public static void showLoginPage() {
         Login login = new Login(connection);
         Scene scene = new Scene(login.getView());
         stage.setScene(scene);
         stage.show();
-        login.setSignupAction(this::showSignupPage);
-        login.setLoginAction(this::showApplicantDashboardPage);
+//        login.setSignupAction(this::showSignupPage);
+//        login.setLoginAction(() -> {
+//            try {
+//                UserData userData = login.checkCredentials();
+//                if (userData != null) {
+//                    showApplicantDashboardPage(userData);
+//                }
+//            } catch (SQLException e) {
+//                e.printStackTrace();
+//            }
+//        });
     }
 
-    private void showSignupPage() {
+    public static void showSignupPage() {
         SignUp signup = new SignUp();
         Scene scene = new Scene(signup.getView());
         stage.setScene(scene);
         stage.show();
-        signup.setLoginAction(this::showLoginPage);
-        signup.setRegistrationAction(this::showRegistrationPage);
+//        signup.setLoginAction(this::showLoginPage);
+//        signup.setRegistrationAction(this::showRegistrationPage);
     }
 
     private void showRegistrationPage() {
@@ -51,28 +60,28 @@ public class Main extends Application {
         stage.show();
     }
 
-    private void showRegistrarDashboardPage() {
-        RegistrarDashboard registrar = new RegistrarDashboard();
+    private void showRegistrarDashboardPage(UserData userData) {
+        RegistrarDashboard registrar = new RegistrarDashboard(userData);
         Scene scene = new Scene(registrar.getView());
         stage.setScene(scene);
         stage.show();
-        registrar.setLogoutAction(this::showLoginPage);
+//        registrar.setLogoutAction(this::showLoginPage);
     }
 
-    private void showAdminDashboardPage() {
-        AdminDashboard admin = new AdminDashboard();
+    private void showAdminDashboardPage(UserData userData) {
+        AdminDashboard admin = new AdminDashboard(userData);
         Scene scene = new Scene(admin.getView());
         stage.setScene(scene);
         stage.show();
-        admin.setLogoutAction(this::showLoginPage);
+//        admin.setLogoutAction(this::showLoginPage);
     }
 
-    private void showApplicantDashboardPage() {
-        ApplicantDashboard applicant = new ApplicantDashboard();
+    public static void showApplicantDashboardPage(UserData userData) {
+        ApplicantDashboard applicant = new ApplicantDashboard(userData);
         Scene scene = new Scene(applicant.getView());
         stage.setScene(scene);
         stage.show();
-        applicant.setLogoutAction(this::showLoginPage);
+//        applicant.setLogoutAction(this::showLoginPage);
     }
 
     public static void main(String[] args) {

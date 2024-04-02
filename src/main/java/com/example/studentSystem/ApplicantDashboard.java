@@ -15,9 +15,9 @@ public class ApplicantDashboard {
 
     private final GridPane grid;
     private Runnable logoutAction;
-    public ApplicantDashboard() {
+    public ApplicantDashboard(UserData userData) {
 
-        Label header = new Label("Hi, Applicant");
+        Label header = new Label("Hi, " + userData.getName());
         header.setFont(Font.font("Tahoma", FontWeight.BOLD, 20));
         header.setMaxWidth(Double.MAX_VALUE);
 
@@ -26,10 +26,10 @@ public class ApplicantDashboard {
 
         ImageView applicantImg = new ImageView();
 
-        Text name = new Text("Name");
+        Text name = new Text("Name: " + userData.getName());
         name.setWrappingWidth(200);
 
-        Text email = new Text("Email");
+        Text email = new Text("Email: " + userData.getEmail());
         email.setWrappingWidth(200);
 
         Text phone = new Text("Phone Number");
@@ -95,16 +95,14 @@ public class ApplicantDashboard {
         grid.add(row5,0,4);
 
         logoutBtn.setOnAction(actionEvent -> {
-            if (logoutAction != null) {
-                logoutAction.run();
-            }
+            Main.showLoginPage();
         });
     }
 
     public GridPane getView() {
         return grid;
     }
-    public void setLogoutAction(Runnable logoutAction) {
-        this.logoutAction = logoutAction;
-    }
+//    public void setLogoutAction(Runnable logoutAction) {
+//        this.logoutAction = logoutAction;
+//    }
 }

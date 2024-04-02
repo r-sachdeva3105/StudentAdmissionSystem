@@ -14,7 +14,7 @@ public class AdminDashboard {
     private final GridPane grid;
     private Runnable logoutAction;
 
-    public AdminDashboard() {
+    public AdminDashboard(UserData userData) {
 
         Label header = new Label("Hi, Admin");
         header.setFont(Font.font("Tahoma", FontWeight.BOLD, 20));

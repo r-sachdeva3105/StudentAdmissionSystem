@@ -14,7 +14,7 @@ public class RegistrarDashboard {
     private final GridPane grid;
     private Runnable logoutAction;
 
-    public RegistrarDashboard() {
+    public RegistrarDashboard(UserData userData) {
 
         Label header = new Label("Hi, Registrar");
         header.setFont(Font.font("Tahoma", FontWeight.BOLD, 20));

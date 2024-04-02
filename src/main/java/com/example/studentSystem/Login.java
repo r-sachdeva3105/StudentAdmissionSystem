@@ -1,4 +1,5 @@
 package com.example.studentSystem;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -13,15 +14,15 @@ import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class Login {
     private final GridPane grid;
     private Connection connection;
-    private Runnable signupAction;
-    private Runnable loginAction;
 
     public Login(Connection connection) {
-
         this.connection = connection;
 
         Label header = new Label("Login");
@@ -90,18 +91,28 @@ public class Login {
         grid.add(row6,0,5);
 
         loginBtn.setOnAction(event -> {
-            if (email.getText().isEmpty() || password.getText().isEmpty())
+            if (email.getText().isEmpty() || password.getText().isEmpty()) {
+                error.setText("Fields should not be empty");
                 error.setVisible(true);
-            else if (loginAction != null) {
-                error.setVisible(false);
-                loginAction.run();
+            }
+            else {
+                try {
+                    UserData userData = checkCredentials(email.getText(), password.getText());
+                    if (userData != null) {
+                        error.setVisible(false);
+                        Main.showApplicantDashboardPage(userData);
+                    } else {
+                        error.setText("Invalid email or password");
+                        error.setVisible(true);
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
         signUpBtn.setOnAction(actionEvent -> {
-            if (signupAction != null) {
-                signupAction.run();
-            }
+            Main.showSignupPage();
         });
     }
 
@@ -109,11 +120,22 @@ public class Login {
         return grid;
     }
 
-    public void setSignupAction(Runnable signupAction) {
-        this.signupAction = signupAction;
-    }
-
-    public void setLoginAction(Runnable loginAction) {
-        this.loginAction = loginAction;
+    private UserData checkCredentials(String email, String password) throws SQLException {
+        String sql = "SELECT * FROM users WHERE email = ? AND password = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, email);
+            statement.setString(2, password);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    UserData userData = new UserData();
+                    userData.setId(resultSet.getInt("id"));
+                    userData.setEmail(resultSet.getString("email"));
+                    userData.setName(resultSet.getString("name"));
+                    return userData;
+                } else {
+                    return null;
+                }
+            }
+        }
     }
 }
