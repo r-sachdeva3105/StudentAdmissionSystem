@@ -100,7 +100,16 @@ public class Login {
                     UserData userData = checkCredentials(email.getText(), password.getText());
                     if (userData != null) {
                         error.setVisible(false);
-                        Main.showApplicantDashboardPage(userData);
+                        String userType = userData.getUserType();
+                        if ("applicant".equals(userType)) {
+                            Main.showApplicantDashboardPage(userData);
+                        } else if ("registrar".equals(userType)) {
+                            Main.showRegistrarDashboardPage(userData);
+                        } else if ("admin".equals(userType)) {
+                            Main.showAdminDashboardPage(userData);
+                        } else {
+                            // Handle other user types if needed
+                        }
                     } else {
                         error.setText("Invalid email or password");
                         error.setVisible(true);
@@ -121,16 +130,18 @@ public class Login {
     }
 
     private UserData checkCredentials(String email, String password) throws SQLException {
-        String sql = "SELECT * FROM users WHERE email = ? AND password = ?";
+        String sql = "SELECT * FROM user_id WHERE EmailAddress = ? AND Password = ?";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, email);
             statement.setString(2, password);
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
                     UserData userData = new UserData();
-                    userData.setId(resultSet.getInt("id"));
-                    userData.setEmail(resultSet.getString("email"));
-                    userData.setName(resultSet.getString("name"));
+                    userData.setId(resultSet.getInt("ID"));
+                    userData.setEmail(resultSet.getString("EmailAddress"));
+                    userData.setName(resultSet.getString("Username"));
+                    String userType = resultSet.getString("UserType");
+                    userData.setUserType(userType); // Assuming UserData has a setUserType method
                     return userData;
                 } else {
                     return null;
@@ -138,4 +149,6 @@ public class Login {
             }
         }
     }
+
 }
+

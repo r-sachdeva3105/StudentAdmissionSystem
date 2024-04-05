@@ -5,6 +5,8 @@ public class UserData {
     private String email;
     private String name;
 
+    private String userType;
+
     public int getId() {
         return id;
     }
@@ -27,6 +29,14 @@ public class UserData {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getUserType() {
+        return userType;
+    }
+
+    public void setUserType(String userType) {
+        this.userType = userType;
     }
 }
 

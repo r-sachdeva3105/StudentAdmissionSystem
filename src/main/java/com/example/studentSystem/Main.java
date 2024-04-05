@@ -10,7 +10,10 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class Main extends Application {
-
+    public static final String DATABASE_NAME = "student_db";
+    public static final String DB_USERNAME = "root";
+    public static final String DB_PASSWORD = "hello123";
+    public static final String URL = "jdbc:mysql://localhost:3306/" + DATABASE_NAME;
     private static Stage stage;
     private static Connection connection;
 
@@ -19,7 +22,7 @@ public class Main extends Application {
         this.stage = stage;
         stage.setTitle("Student Admission System");
         try {
-            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/your_database", "username", "password");
+            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/" + DATABASE_NAME, DB_USERNAME, DB_PASSWORD);
             showLoginPage();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -53,14 +56,14 @@ public class Main extends Application {
 //        signup.setRegistrationAction(this::showRegistrationPage);
     }
 
-    private void showRegistrationPage() {
+    public void showRegistrationPage() {
         Registration registration = new Registration();
         Scene scene = new Scene(registration.getView());
         stage.setScene(scene);
         stage.show();
     }
 
-    private void showRegistrarDashboardPage(UserData userData) {
+    public static void showRegistrarDashboardPage(UserData userData) {
         RegistrarDashboard registrar = new RegistrarDashboard(userData);
         Scene scene = new Scene(registrar.getView());
         stage.setScene(scene);
@@ -68,7 +71,7 @@ public class Main extends Application {
 //        registrar.setLogoutAction(this::showLoginPage);
     }
 
-    private void showAdminDashboardPage(UserData userData) {
+    public static void showAdminDashboardPage(UserData userData) {
         AdminDashboard admin = new AdminDashboard(userData);
         Scene scene = new Scene(admin.getView());
         stage.setScene(scene);
