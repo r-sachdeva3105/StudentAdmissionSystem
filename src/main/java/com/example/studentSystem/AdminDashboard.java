@@ -21,8 +21,9 @@ public class AdminDashboard {
     private final GridPane grid;
     private Runnable logoutAction;
 
-    public AdminDashboard(UserData userData) {
+    private ChoiceBox<String> filter;
 
+    public AdminDashboard(UserData userData) {
         Label header = new Label("Hi, Admin");
         header.setFont(Font.font("Tahoma", FontWeight.BOLD, 20));
         header.setMaxWidth(Double.MAX_VALUE);
@@ -30,7 +31,8 @@ public class AdminDashboard {
         Button logoutBtn = new Button("Logout");
         logoutBtn.setMinWidth(80);
 
-        ChoiceBox<String> filter = new ChoiceBox<>();
+        // Initialize the class-level filter field
+        filter = new ChoiceBox<>();
         filter.getItems().addAll("Applicants", "Registrars");
         filter.setValue("Applicants");
         filter.setPrefWidth(100);
@@ -54,13 +56,11 @@ public class AdminDashboard {
         applicantView.getColumns().addAll(idColumn, nameColumn, phoneColumn, emailColumn);
 
         filter.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            if ("Applicants".equals(newValue)) {
-                try {
-                    ObservableList<Applicant> applicantsList = getApplicantsFromDatabase();
-                    applicantView.setItems(applicantsList);
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+            try {
+                ObservableList<Applicant> applicantsList = getApplicantsFromDatabase(newValue);
+                applicantView.setItems(applicantsList);
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
         });
 
@@ -161,9 +161,7 @@ public class AdminDashboard {
         logoutBtn.setOnAction(actionEvent -> {
             Main.showLoginPage();
         });
-
     }
-
 
     public GridPane getView() {
         return grid;
@@ -173,10 +171,12 @@ public class AdminDashboard {
         this.logoutAction = logoutAction;
     }
 
-    // Method to fetch applicants data from the database
-    private ObservableList<Applicant> getApplicantsFromDatabase() throws SQLException {
+
+
+    private ObservableList<Applicant> getApplicantsFromDatabase(String newValue) throws SQLException {
         ObservableList<Applicant> applicantsList = FXCollections.observableArrayList();
-        String sql = "SELECT ID, firstName, lastName, emailAddress, phoneNumber FROM applicants";
+        String tableName = newValue.equals("Applicants") ? "applicants" : "registrar";
+        String sql = "SELECT ID, firstName, lastName, emailAddress, phoneNumber FROM " + tableName;
         try (PreparedStatement statement = connection.prepareStatement(sql);
              ResultSet resultSet = statement.executeQuery()) {
             while (resultSet.next()) {
@@ -187,28 +187,12 @@ public class AdminDashboard {
                 String phone = resultSet.getString("phoneNumber");
                 String email = resultSet.getString("emailAddress");
                 applicantsList.add(new Applicant(id, name, phone, email));
+
+
             }
+            return applicantsList;
         }
-        return applicantsList;
     }
-
-//    private void deleteApplicantFromDatabase(int applicantID) throws SQLException {
-//        String sql = "DELETE FROM applicants WHERE ID = ?";
-//        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-//            statement.setInt(1, applicantID);
-//            int rowsAffected = statement.executeUpdate();
-//            if (rowsAffected > 0) {
-//                System.out.println("Applicant deleted successfully.");
-//            } else {
-//                System.out.println("No applicant found with ID: " + applicantID);
-//            }
-//        }
-//
-//    }
 }
-
-
-
-
 
 

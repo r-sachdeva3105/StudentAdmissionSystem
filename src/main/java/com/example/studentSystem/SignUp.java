@@ -116,11 +116,14 @@ public class SignUp {
                 error.setText("Password Mismatch");
                 error.setVisible(true);
             }
-            else
+
+            else{
+                Main.showRegistrationPage();
                 error.setVisible(false);
-                if (registrationAction != null) {
-                    registrationAction.run();
-                }
+
+            }
+
+
         });
 
         loginBtn.setOnAction(actionEvent -> {

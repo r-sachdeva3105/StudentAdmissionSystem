@@ -45,7 +45,7 @@ public class Main extends Application {
 //        signup.setRegistrationAction(this::showRegistrationPage);
     }
 
-    public void showRegistrationPage() {
+    public static void showRegistrationPage() {
         Registration registration = new Registration();
         Scene scene = new Scene(registration.getView());
         stage.setScene(scene);
