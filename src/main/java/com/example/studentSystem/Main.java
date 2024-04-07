@@ -15,7 +15,7 @@ public class Main extends Application {
     public static final String DB_PASSWORD = "hello123";
     public static final String URL = "jdbc:mysql://localhost:3306/" + DATABASE_NAME;
     private static Stage stage;
-    private static Connection connection;
+    public static Connection connection;
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -34,17 +34,6 @@ public class Main extends Application {
         Scene scene = new Scene(login.getView());
         stage.setScene(scene);
         stage.show();
-//        login.setSignupAction(this::showSignupPage);
-//        login.setLoginAction(() -> {
-//            try {
-//                UserData userData = login.checkCredentials();
-//                if (userData != null) {
-//                    showApplicantDashboardPage(userData);
-//                }
-//            } catch (SQLException e) {
-//                e.printStackTrace();
-//            }
-//        });
     }
 
     public static void showSignupPage() {

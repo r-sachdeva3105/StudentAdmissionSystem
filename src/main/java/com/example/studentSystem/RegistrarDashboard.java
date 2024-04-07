@@ -33,8 +33,8 @@ public class RegistrarDashboard {
         TableColumn<Applicant, String> nameColumn = new TableColumn<>("Name");
         nameColumn.setCellValueFactory(cellData -> cellData.getValue().getApplicantName());
 
-        TableColumn<Applicant, Integer> phoneColumn = new TableColumn<>("Phone");
-        phoneColumn.setCellValueFactory(cellData -> cellData.getValue().getApplicantPhone().asObject());
+        TableColumn<Applicant, String> phoneColumn = new TableColumn<>("Phone");
+        phoneColumn.setCellValueFactory(cellData -> cellData.getValue().getApplicantPhone());
 
         TableColumn<Applicant, String> emailColumn = new TableColumn<>("Email");
         emailColumn.setCellValueFactory(cellData -> cellData.getValue().getApplicantEmail());
@@ -110,10 +110,9 @@ public class RegistrarDashboard {
         grid.add(row6,0,5);
 
         logoutBtn.setOnAction(actionEvent -> {
-            if (logoutAction != null) {
-                logoutAction.run();
-            }
+            Main.showLoginPage();
         });
+
     }
 
     public GridPane getView() {
