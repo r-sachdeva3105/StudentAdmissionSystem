@@ -19,7 +19,9 @@ import static com.example.studentSystem.Main.connection;
 
 public class AdminDashboard {
     private final GridPane grid;
-    private Runnable logoutAction;
+    Text program1;
+    Text program2;
+    Text program3;
 
     public AdminDashboard(UserData userData) {
 
@@ -37,7 +39,6 @@ public class AdminDashboard {
 
         TableView<Applicant> applicantView = new TableView<>();
         applicantView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-        applicantView.setMaxWidth(Double.MAX_VALUE);
 
         TableColumn<Applicant, Integer> idColumn = new TableColumn<>("ID");
         idColumn.setCellValueFactory(cellData -> cellData.getValue().getApplicantID().asObject());
@@ -53,16 +54,25 @@ public class AdminDashboard {
 
         applicantView.getColumns().addAll(idColumn, nameColumn, phoneColumn, emailColumn);
 
+//        filter.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+//            if ("Applicants".equals(newValue)) {
+//                try {
+//                    ObservableList<Applicant> applicantsList = getApplicantsFromDatabase();
+//                    applicantView.setItems(applicantsList);
+//                } catch (SQLException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        });
         filter.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            if ("Applicants".equals(newValue)) {
-                try {
-                    ObservableList<Applicant> applicantsList = getApplicantsFromDatabase();
-                    applicantView.setItems(applicantsList);
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+            try {
+                ObservableList<Applicant> applicantsList = getApplicantsFromDatabase(newValue);
+                applicantView.setItems(applicantsList);
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
         });
+        applicantView.setMaxWidth(800);
 
         Label program1Label = new Label("Program 1:");
         program1Label.setPrefWidth(100);
@@ -73,13 +83,13 @@ public class AdminDashboard {
         Label program3Label = new Label("Program 3:");
         program3Label.setPrefWidth(100);
 
-        Text program1 = new Text("Program 1");
+        program1 = new Text();
         program1.setWrappingWidth(100);
 
-        Text program2 = new Text("Program 2");
+        program2 = new Text();
         program2.setWrappingWidth(100);
 
-        Text program3 = new Text("Program 3");
+        program3 = new Text();
         program3.setWrappingWidth(100);
 
         Button updateBtn = new Button("Update");
@@ -87,9 +97,6 @@ public class AdminDashboard {
 
         Button deleteBtn = new Button("Delete");
         deleteBtn.setMinWidth(80);
-
-        Button addBtn = new Button("Add");
-        addBtn.setMinWidth(80);
 
         Button reportBtn = new Button("Report");
         reportBtn.setMinWidth(80);
@@ -139,7 +146,7 @@ public class AdminDashboard {
         row3.getChildren().addAll(applicantView);
         row4.getChildren().addAll(program1Label, program2Label, program3Label);
         row5.getChildren().addAll(program1, program2, program3);
-        row6.getChildren().addAll(updateBtn, deleteBtn, addBtn, reportBtn);
+        row6.getChildren().addAll(updateBtn, deleteBtn, reportBtn);
         row7.getChildren().addAll(status, submitBtn);
         row8.getChildren().addAll(addApplicantBtn, addRegistrarBtn);
 
@@ -162,6 +169,49 @@ public class AdminDashboard {
             Main.showLoginPage();
         });
 
+        deleteBtn.setOnAction(actionEvent -> {
+            Applicant selectedApplicant = applicantView.getSelectionModel().getSelectedItem();
+
+            if (selectedApplicant != null) {
+                int applicantID = selectedApplicant.getApplicantID().get();
+
+                try {
+                    deleteApplicantFromDatabase(applicantID);
+
+                    applicantView.getItems().remove(selectedApplicant);
+
+                    System.out.println("Applicant deleted successfully.");
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    System.out.println("Failed to delete applicant.");
+                }
+            } else {
+                System.out.println("No applicant selected.");
+            }
+        });
+
+        try {
+            ObservableList<Applicant> applicantsList = getApplicantsFromDatabase("Applicants");
+            applicantView.setItems(applicantsList);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        applicantView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                Applicant selectedApplicant = applicantView.getSelectionModel().getSelectedItem();
+                try {
+                    ObservableList<Applicant> applicantsList = getApplicantsFromDatabase("Applicants");
+                    for (Applicant applicant : applicantsList) {
+                        System.out.println("Applicant ID: " + applicant.getApplicantID().get());
+                    }
+                    getApplicantPrograms(selectedApplicant.getApplicantID().get());
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
     }
 
 
@@ -169,14 +219,28 @@ public class AdminDashboard {
         return grid;
     }
 
-    public void setLogoutAction(Runnable logoutAction) {
-        this.logoutAction = logoutAction;
-    }
+//    private ObservableList<Applicant> getApplicantsFromDatabase() throws SQLException {
+//        ObservableList<Applicant> applicantsList = FXCollections.observableArrayList();
+//        String sql = "SELECT ID, firstName, lastName, emailAddress, phoneNumber FROM applicants";
+//        try (PreparedStatement statement = connection.prepareStatement(sql);
+//             ResultSet resultSet = statement.executeQuery()) {
+//            while (resultSet.next()) {
+//                int id = resultSet.getInt("ID");
+//                String firstName = resultSet.getString("firstName");
+//                String lastName = resultSet.getString("lastName");
+//                String name = firstName + " " + lastName;
+//                String phone = resultSet.getString("phoneNumber");
+//                String email = resultSet.getString("emailAddress");
+//                applicantsList.add(new Applicant(id, name, phone, email));
+//            }
+//        }
+//        return applicantsList;
+//    }
 
-    // Method to fetch applicants data from the database
-    private ObservableList<Applicant> getApplicantsFromDatabase() throws SQLException {
+    private ObservableList<Applicant> getApplicantsFromDatabase(String newValue) throws SQLException {
         ObservableList<Applicant> applicantsList = FXCollections.observableArrayList();
-        String sql = "SELECT ID, firstName, lastName, emailAddress, phoneNumber FROM applicants";
+        String tableName = newValue.equals("Applicants") ? "applicants" : "registrar";
+        String sql = "SELECT ID, firstName, lastName, emailAddress, phoneNumber FROM " + tableName;
         try (PreparedStatement statement = connection.prepareStatement(sql);
              ResultSet resultSet = statement.executeQuery()) {
             while (resultSet.next()) {
@@ -187,28 +251,35 @@ public class AdminDashboard {
                 String phone = resultSet.getString("phoneNumber");
                 String email = resultSet.getString("emailAddress");
                 applicantsList.add(new Applicant(id, name, phone, email));
+
             }
+            return applicantsList;
         }
-        return applicantsList;
     }
 
-//    private void deleteApplicantFromDatabase(int applicantID) throws SQLException {
-//        String sql = "DELETE FROM applicants WHERE ID = ?";
-//        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-//            statement.setInt(1, applicantID);
-//            int rowsAffected = statement.executeUpdate();
-//            if (rowsAffected > 0) {
-//                System.out.println("Applicant deleted successfully.");
-//            } else {
-//                System.out.println("No applicant found with ID: " + applicantID);
-//            }
-//        }
-//
-//    }
+    private void getApplicantPrograms(int applicantID) throws SQLException {
+        String sql = "SELECT fieldOfStudy1, fieldOfStudy2, fieldOfStudy3 FROM applicants WHERE ID = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, applicantID);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    String fieldOfStudy1 = resultSet.getString("fieldOfStudy1");
+                    String fieldOfStudy2 = resultSet.getString("fieldOfStudy2");
+                    String fieldOfStudy3 = resultSet.getString("fieldOfStudy3");
+
+                    program1.setText(fieldOfStudy1);
+                    program2.setText(fieldOfStudy2);
+                    program3.setText(fieldOfStudy3);
+                }
+            }
+        }
+    }
+
+    private void deleteApplicantFromDatabase(int applicantID) throws SQLException {
+        String sql = "DELETE FROM applicants WHERE ID = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, applicantID);
+            statement.executeUpdate();
+        }
+    }
 }
-
-
-
-
-
-

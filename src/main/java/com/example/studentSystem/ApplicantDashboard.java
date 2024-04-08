@@ -1,7 +1,6 @@
 package com.example.studentSystem;
 
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
@@ -11,12 +10,16 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 public class ApplicantDashboard {
 
     private final GridPane grid;
     private Runnable logoutAction;
-    public ApplicantDashboard(UserData userData) {
 
+    public ApplicantDashboard(UserData userData) {
         Label header = new Label("Hi, " + userData.getName());
         header.setFont(Font.font("Tahoma", FontWeight.BOLD, 20));
         header.setMaxWidth(Double.MAX_VALUE);
@@ -26,19 +29,19 @@ public class ApplicantDashboard {
 
         ImageView applicantImg = new ImageView();
 
-        Text name = new Text("Name: " + userData.getName());
+        Text name = new Text();
         name.setWrappingWidth(200);
 
-        Text email = new Text("Email: " + userData.getEmail());
+        Text email = new Text();
         email.setWrappingWidth(200);
 
-        Text phone = new Text("Phone Number");
+        Text phone = new Text();
         phone.setWrappingWidth(200);
 
-        Text dob = new Text("Date of Birth");
+        Text dob = new Text();
         dob.setWrappingWidth(200);
 
-        Text gender = new Text("Gender");
+        Text gender = new Text();
         gender.setWrappingWidth(200);
 
         Text program1 = new Text("Program 1");
@@ -97,12 +100,49 @@ public class ApplicantDashboard {
         logoutBtn.setOnAction(actionEvent -> {
             Main.showLoginPage();
         });
+
+        // Fetch and display applicant data
+        try {
+            Applicant applicant = getApplicantData(userData.getId());
+            name.setText("Name: " + applicant.getApplicantName().get());
+            email.setText("Email: " + applicant.getApplicantEmail().get());
+            phone.setText("Phone: " + applicant.getApplicantPhone().get());
+            dob.setText("Date of Birth: " + applicant.getDob().get());
+            gender.setText("Gender: " + applicant.getGender().get());
+            program1.setText("Program 1: " + applicant.getProgram1().get());
+            program2.setText("Program 2: " + applicant.getProgram2().get());
+            program3.setText("Program 3: " + applicant.getProgram3().get());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     public GridPane getView() {
         return grid;
     }
-//    public void setLogoutAction(Runnable logoutAction) {
-//        this.logoutAction = logoutAction;
-//    }
+
+    private Applicant getApplicantData(int userID) throws SQLException {
+        String sql = "SELECT * FROM applicants WHERE ID = ?";
+        try (PreparedStatement statement = Main.connection.prepareStatement(sql)) {
+            statement.setInt(1, userID);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    int id = resultSet.getInt("ID");
+                    String firstName = resultSet.getString("firstName");
+                    String lastName = resultSet.getString("lastName");
+                    String name = firstName + " " + lastName;
+                    String email = resultSet.getString("emailAddress");
+                    String phone = resultSet.getString("phoneNumber");
+                    String dob = resultSet.getString("dob");
+                    String gender = resultSet.getString("gender");
+                    String program1 = resultSet.getString("fieldOfStudy1");
+                    String program2 = resultSet.getString("fieldOfStudy2");
+                    String program3 = resultSet.getString("fieldOfStudy3");
+                    return new Applicant(id, name, phone, email, program1, program2, program3, dob, gender);
+                } else {
+                    throw new SQLException("No applicant found with ID: " + userID);
+                }
+            }
+        }
+    }
 }
