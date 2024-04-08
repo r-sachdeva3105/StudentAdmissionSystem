@@ -142,9 +142,8 @@ public class SignUp {
         });
 
         loginBtn.setOnAction(actionEvent -> {
-            if (loginAction != null) {
-                loginAction.run();
-            }
+            Main.showLoginPage();
+
         });
     }
 
