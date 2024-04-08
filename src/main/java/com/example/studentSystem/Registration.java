@@ -1,5 +1,7 @@
 package com.example.studentSystem;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
@@ -8,15 +10,18 @@ import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import javafx.stage.FileChooser;
 
-import java.io.File;
-import java.util.Date;
+import java.sql.*;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.example.studentSystem.Main.connection;
 
 public class Registration {
     private final GridPane grid;
+
     public Registration() {
-//name, email, phone, dob, gender, address,
         Label header = new Label("Registration");
         header.setFont(Font.font("Tahoma", FontWeight.BOLD, 20));
 
@@ -57,9 +62,9 @@ public class Registration {
         TextField gpa = new TextField();
         gpa.setPrefWidth(200);
 
-        Label streetlabel = new Label("Street:");
-        streetlabel.setPrefWidth(120);
-        streetlabel.setAlignment(Pos.CENTER_RIGHT);
+        Label streetLabel = new Label("Street:");
+        streetLabel.setPrefWidth(120);
+        streetLabel.setAlignment(Pos.CENTER_RIGHT);
         TextField street = new TextField();
         street.setPrefWidth(200);
 
@@ -93,6 +98,7 @@ public class Registration {
         program3Label.setAlignment(Pos.CENTER_RIGHT);
         ChoiceBox<String> program3 = new ChoiceBox<>();
         program3.setPrefWidth(200);
+
 
         CheckBox accuracyCheck = new CheckBox("I declare that the information provided is accurate to the best of my knowledge");
 
@@ -134,7 +140,7 @@ public class Registration {
         row1.getChildren().addAll(header);
         row2.getChildren().addAll(nameLabel, name, emailLabel, email, phoneLabel, phone);
         row3.getChildren().addAll(dobLabel, dob, genderLabel, gender, gpaLabel, gpa);
-        row4.getChildren().addAll(streetlabel, street, cityLabel, city, countryLabel, country);
+        row4.getChildren().addAll(streetLabel, street, cityLabel, city, countryLabel, country);
         row5.getChildren().addAll(program1Label, program1, program2Label, program2, program3Label, program3);
         row6.getChildren().addAll(accuracyCheck);
         row7.getChildren().addAll(error);
@@ -155,17 +161,119 @@ public class Registration {
         grid.add(row7,0,6);
         grid.add(row8,0,7);
 
+        ObservableList<String> programOptions = FXCollections.observableArrayList(getProgramOptionsFromDatabase());
+        program1.setItems(programOptions);
+        program2.setItems(programOptions);
+        program3.setItems(programOptions);
+
+
         submitBtn.setOnAction(actionEvent -> {
             if (name.getText().isEmpty() || email.getText().isEmpty() || phone.getText().isEmpty() ||
                     dob.getValue() == null || gender.getValue() == null || street.getText().isEmpty() ||
                     city.getText().isEmpty() || country.getValue() == null || program1.getValue() == null ||
-                    program2.getValue() == null || program3.getValue() == null || !accuracyCheck.isSelected())
+                    program2.getValue() == null || program3.getValue() == null || !accuracyCheck.isSelected()) {
                 error.setVisible(true);
-            else
+            } else {
                 error.setVisible(false);
+                try {
+                    // Convert LocalDate to java.sql.Date
+                    Date sqlDate = Date.valueOf(dob.getValue());
+
+                    // Call insertApplicant method
+                    if (insertApplicant(name.getText(), email.getText(), phone.getText(),
+                            sqlDate, gender.getValue(), gpa.getText(),
+                            street.getText(), city.getText(), country.getValue(),
+                            program1.getValue(), program2.getValue(), program3.getValue())) {
+                        // If insertion is successful, show a success message
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                        alert.setTitle("Success");
+                        alert.setHeaderText(null);
+                        alert.setContentText("Applicant registered successfully!");
+                        alert.showAndWait();
+                    } else {
+                        // If insertion fails, show an error message
+                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setTitle("Error");
+                        alert.setHeaderText(null);
+                        alert.setContentText("Failed to register applicant!");
+                        alert.showAndWait();
+                    }
+                } catch (SQLException e) {
+                    // If an SQL exception occurs, show an error message
+                    System.out.println(e);
+                    e.printStackTrace();
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Error");
+                    alert.setHeaderText(null);
+                    alert.setContentText("An error occurred while registering applicant!");
+                    alert.showAndWait();
+                }
+            }
         });
     }
+
     public GridPane getView() {
         return grid;
     }
+
+    private List<String> getProgramOptionsFromDatabase() {
+        List<String> programOptions = new ArrayList<>();
+        try {
+            // Assuming you have a PreparedStatement to query the "fieldofstudy" table
+            String query = "SELECT program_name FROM fieldofstudy";
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                programOptions.add(resultSet.getString("program_name"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            // Handle exceptions here
+        }
+        return programOptions;
+    }
+
+
+    private boolean insertApplicant(String name, String email, String phone,
+                                    Date dob, String gender, String gpa,
+                                    String street, String city, String country,
+                                    String program1, String program2, String program3) throws SQLException {
+
+        String[] nameParts = name.split("\\s+", 2); // Split at the first occurrence of whitespace
+        String firstName = "";
+        String lastName = "";
+        if (nameParts.length > 0) {
+            firstName = nameParts[0];
+            if (nameParts.length > 1) {
+                lastName = nameParts[1];
+            }
+        }
+        // SQL query to insert data into the applicants table
+        String sql = "INSERT INTO applicants (firstName, lastName, emailAddress, phoneNumber, dob, gender, gpa, street, city, country, fieldOfStudy1, fieldOfStudy2, fieldOfStudy3) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            // Set values for each parameter in the SQL query
+            statement.setString(1, firstName);
+            statement.setString(2, lastName);
+            statement.setString(3, email);
+            statement.setString(4, phone);
+            statement.setDate(5, dob);
+            statement.setString(6, gender);
+            statement.setString(7, gpa);
+            statement.setString(8, street);
+            statement.setString(9, city);
+            statement.setString(10, country);
+            statement.setString(11, program1);
+            statement.setString(12, program2);
+            statement.setString(13, program3);
+
+            // Execute the SQL query and get the number of rows affected
+            int rowsInserted = statement.executeUpdate();
+
+            // Return true if at least one row is inserted, false otherwise
+            return rowsInserted > 0;
+        }
+    }
 }
+

@@ -1,5 +1,7 @@
 package com.example.studentSystem;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
@@ -9,10 +11,20 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import static com.example.studentSystem.Main.connection;
+
 public class RegistrarDashboard {
 
     private final GridPane grid;
     private Runnable logoutAction;
+
+    Text program1;
+    Text program2;
+    Text program3;
 
     public RegistrarDashboard(UserData userData) {
 
@@ -41,13 +53,25 @@ public class RegistrarDashboard {
 
         applicantView.getColumns().addAll(idColumn, nameColumn, phoneColumn, emailColumn);
 
+        try {
+            ObservableList<Applicant> applicantsList = getApplicantsFromDatabase();
+            applicantView.setItems(applicantsList);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
         Label program1Label = new Label("Program 1:");
         Label program2Label = new Label("Program 2:");
         Label program3Label = new Label("Program 3:");
 
-        Text program1 = new Text("Program 1");
-        Text program2 = new Text("Program 2");
-        Text program3 = new Text("Program 3");
+        program1 = new Text();
+        program1.setWrappingWidth(100);
+
+        program2 = new Text();
+        program2.setWrappingWidth(100);
+
+        program3 = new Text();
+        program3.setWrappingWidth(100);
 
         Button updateBtn = new Button("Update");
         updateBtn.setMinWidth(80);
@@ -113,10 +137,102 @@ public class RegistrarDashboard {
             Main.showLoginPage();
         });
 
+        addBtn.setOnAction(actionEvent -> {
+            Main.showRegistrationPage(); // Direct to the registration page
+        });
+
+        deleteBtn.setOnAction(actionEvent -> {
+            Applicant selectedApplicant = applicantView.getSelectionModel().getSelectedItem();
+
+            if (selectedApplicant != null) {
+                int applicantID = selectedApplicant.getApplicantID().get();
+
+                try {
+                    deleteApplicantFromDatabase(applicantID);
+
+                    applicantView.getItems().remove(selectedApplicant);
+
+                    System.out.println("Applicant deleted successfully.");
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    System.out.println("Failed to delete applicant.");
+                }
+            } else {
+                System.out.println("No applicant selected.");
+            }
+        });
+
+        try {
+            ObservableList<Applicant> applicantsList = getApplicantsFromDatabase();
+            applicantView.setItems(applicantsList);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+
+        applicantView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                Applicant selectedApplicant = applicantView.getSelectionModel().getSelectedItem();
+                try {
+                    ObservableList<Applicant> applicantsList = getApplicantsFromDatabase();
+                    for (Applicant applicant : applicantsList) {
+                        System.out.println("Applicant ID: " + applicant.getApplicantID().get());
+                    }
+                    getApplicantPrograms(selectedApplicant.getApplicantID().get());
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
     }
 
     public GridPane getView() {
         return grid;
+    }
+
+
+    private ObservableList<Applicant> getApplicantsFromDatabase() throws SQLException {
+        ObservableList<Applicant> applicantsList = FXCollections.observableArrayList();
+        String sql = "SELECT ID, firstName, lastName, emailAddress, phoneNumber FROM applicants";
+        try (PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet resultSet = statement.executeQuery()) {
+            while (resultSet.next()) {
+                int id = resultSet.getInt("ID");
+                String firstName = resultSet.getString("firstName");
+                String lastName = resultSet.getString("lastName");
+                String name = firstName + " " + lastName;
+                String phone = resultSet.getString("phoneNumber");
+                String email = resultSet.getString("emailAddress");
+                applicantsList.add(new Applicant(id, name, phone, email));
+            }
+        }
+        return applicantsList;
+    }
+    private void getApplicantPrograms(int applicantID) throws SQLException {
+        String sql = "SELECT fieldOfStudy1, fieldOfStudy2, fieldOfStudy3 FROM applicants WHERE ID = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, applicantID);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    String fieldOfStudy1 = resultSet.getString("fieldOfStudy1");
+                    String fieldOfStudy2 = resultSet.getString("fieldOfStudy2");
+                    String fieldOfStudy3 = resultSet.getString("fieldOfStudy3");
+
+                    program1.setText(fieldOfStudy1);
+                    program2.setText(fieldOfStudy2);
+                    program3.setText(fieldOfStudy3);
+                }
+            }
+        }
+    }
+
+    private void deleteApplicantFromDatabase(int applicantID) throws SQLException {
+        String sql = "DELETE FROM applicants WHERE ID = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, applicantID);
+            statement.executeUpdate();
+        }
     }
     public void setLogoutAction(Runnable logoutAction) {
         this.logoutAction = logoutAction;

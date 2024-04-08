@@ -9,6 +9,11 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
+import static com.example.studentSystem.Main.connection;
+
 public class SignUp {
     private final GridPane grid;
     private Runnable loginAction;
@@ -110,20 +115,30 @@ public class SignUp {
         grid.add(row9,0,8);
 
         signupBtn.setOnAction(actionEvent -> {
-            if (name.getText().isEmpty() || email.getText().isEmpty() || password.getText().isEmpty() || rePass.getText().isEmpty() || !termsCheck.isSelected())
+            if (name.getText().isEmpty() || email.getText().isEmpty() || password.getText().isEmpty() || rePass.getText().isEmpty() || !termsCheck.isSelected()) {
                 error.setVisible(true);
-            else if (!password.getText().equals(rePass.getText())) {
+            } else if (!password.getText().equals(rePass.getText())) {
                 error.setText("Password Mismatch");
                 error.setVisible(true);
+            } else {
+                // Insert values into the database
+                try {
+                    if (insertUser(name.getText(), email.getText(), password.getText())) {
+                        // If insertion is successful, show registration page
+                        Main.showRegistrationPage();
+                        error.setVisible(false);
+                    } else {
+                        // If insertion fails, show an error message
+                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setTitle("Error");
+                        alert.setHeaderText(null);
+                        alert.setContentText("Failed to insert user. Please try again.");
+                        alert.showAndWait();
+                    }
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
             }
-
-            else{
-                Main.showRegistrationPage();
-                error.setVisible(false);
-
-            }
-
-
         });
 
         loginBtn.setOnAction(actionEvent -> {
@@ -137,10 +152,24 @@ public class SignUp {
         return grid;
     }
 
+
     public void setLoginAction(Runnable loginAction) {
         this.loginAction = loginAction;
     }
     public void setRegistrationAction(Runnable registrationAction) {
         this.registrationAction = registrationAction;
     }
+
+    private boolean insertUser(String name, String email, String password) throws SQLException {
+        String sql = "INSERT INTO user_id (Username, EmailAddress, Password) VALUES (?, ?, ?)";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, name);
+            statement.setString(2, email);
+            statement.setString(3, password);
+
+            int rowsInserted = statement.executeUpdate();
+            return rowsInserted > 0;
+        }
+    }
 }
+

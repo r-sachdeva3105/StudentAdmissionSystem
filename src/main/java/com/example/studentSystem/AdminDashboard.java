@@ -25,7 +25,7 @@ public class AdminDashboard {
 
     public AdminDashboard(UserData userData) {
 
-        Label header = new Label("Hi, Admin");
+        Label header = new Label("Hi, " + userData.getName());
         header.setFont(Font.font("Tahoma", FontWeight.BOLD, 20));
         header.setMaxWidth(Double.MAX_VALUE);
 
@@ -34,11 +34,12 @@ public class AdminDashboard {
 
         ChoiceBox<String> filter = new ChoiceBox<>();
         filter.getItems().addAll("Applicants", "Registrars");
-        filter.setValue("Applicants");
+        filter.setValue("Registrars");
         filter.setPrefWidth(100);
 
         TableView<Applicant> applicantView = new TableView<>();
         applicantView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+        applicantView.setMaxWidth(800);
 
         TableColumn<Applicant, Integer> idColumn = new TableColumn<>("ID");
         idColumn.setCellValueFactory(cellData -> cellData.getValue().getApplicantID().asObject());
@@ -72,7 +73,28 @@ public class AdminDashboard {
                 e.printStackTrace();
             }
         });
-        applicantView.setMaxWidth(800);
+
+        try {
+            ObservableList<Applicant> applicantsList = getApplicantsFromDatabase("Registrars");
+            applicantView.setItems(applicantsList);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        applicantView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                Applicant selectedApplicant = applicantView.getSelectionModel().getSelectedItem();
+                try {
+                    ObservableList<Applicant> applicantsList = getApplicantsFromDatabase("Registrars");
+                    for (Applicant applicant : applicantsList) {
+                        System.out.println("Applicant ID: " + applicant.getApplicantID().get());
+                    }
+                    getApplicantPrograms(selectedApplicant.getApplicantID().get());
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
 
         Label program1Label = new Label("Program 1:");
         program1Label.setPrefWidth(100);
@@ -144,10 +166,21 @@ public class AdminDashboard {
         row1.getChildren().addAll(header, logoutBtn);
         row2.getChildren().addAll(filter);
         row3.getChildren().addAll(applicantView);
-        row4.getChildren().addAll(program1Label, program2Label, program3Label);
-        row5.getChildren().addAll(program1, program2, program3);
+//        row4.getChildren().addAll(program1Label, program2Label, program3Label);
+//        row5.getChildren().addAll(program1, program2, program3);
+        filter.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue.equals("Applicants")) {
+                row4.getChildren().addAll(program1Label, program2Label, program3Label);
+                row5.getChildren().addAll(program1, program2, program3);
+                row7.getChildren().addAll(status, submitBtn);
+            } else {
+                row4.getChildren().removeAll(program1Label, program2Label, program3Label);
+                row5.getChildren().removeAll(program1, program2, program3);
+                row7.getChildren().removeAll(status, submitBtn);
+            }
+        });
         row6.getChildren().addAll(updateBtn, deleteBtn, reportBtn);
-        row7.getChildren().addAll(status, submitBtn);
+//        row7.getChildren().addAll(status, submitBtn);
         row8.getChildren().addAll(addApplicantBtn, addRegistrarBtn);
 
         grid = new GridPane();
@@ -187,28 +220,6 @@ public class AdminDashboard {
                 }
             } else {
                 System.out.println("No applicant selected.");
-            }
-        });
-
-        try {
-            ObservableList<Applicant> applicantsList = getApplicantsFromDatabase("Applicants");
-            applicantView.setItems(applicantsList);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        applicantView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                Applicant selectedApplicant = applicantView.getSelectionModel().getSelectedItem();
-                try {
-                    ObservableList<Applicant> applicantsList = getApplicantsFromDatabase("Applicants");
-                    for (Applicant applicant : applicantsList) {
-                        System.out.println("Applicant ID: " + applicant.getApplicantID().get());
-                    }
-                    getApplicantPrograms(selectedApplicant.getApplicantID().get());
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
             }
         });
 
