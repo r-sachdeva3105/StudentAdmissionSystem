@@ -201,6 +201,27 @@ public class AdminDashboard {
         logoutBtn.setOnAction(actionEvent -> {
             Main.showLoginPage();
         });
+        submitBtn.setOnAction(actionEvent -> {
+            Applicant selectedApplicant = applicantView.getSelectionModel().getSelectedItem();
+
+            if (selectedApplicant != null) {
+                String selectedStatus = status.getValue();
+
+                if (selectedStatus != null && !selectedStatus.isEmpty()) {
+                    try {
+                        updateApplicantStatus(selectedApplicant.getApplicantID().get(), selectedStatus);
+                        System.out.println("Applicant status updated successfully.");
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                        System.out.println("Failed to update applicant status.");
+                    }
+                } else {
+                    System.out.println("Please select a status.");
+                }
+            } else {
+                System.out.println("No applicant selected.");
+            }
+        });
 
         deleteBtn.setOnAction(actionEvent -> {
             Applicant selectedApplicant = applicantView.getSelectionModel().getSelectedItem();
@@ -283,6 +304,14 @@ public class AdminDashboard {
                     program3.setText(fieldOfStudy3);
                 }
             }
+        }
+    }
+    private void updateApplicantStatus(int applicantID, String status) throws SQLException {
+        String sql = "UPDATE applicants SET application_status = ? WHERE ID = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, status);
+            statement.setInt(2, applicantID);
+            statement.executeUpdate();
         }
     }
 
