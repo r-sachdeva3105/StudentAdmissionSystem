@@ -53,8 +53,15 @@ public class SignUp {
         error.setTextFill(Color.RED);
         error.setVisible(false);
 
-        Label loginLabel = new Label("If you already have account, please login: ");
+        Label loginLabel = new Label("If you already have an account, please login: ");
         Button loginBtn = new Button("Login");
+
+        RadioButton applicantRadio = new RadioButton("Applicant");
+        RadioButton registrarRadio = new RadioButton("Registrar");
+
+        ToggleGroup userTypeGroup = new ToggleGroup();
+        applicantRadio.setToggleGroup(userTypeGroup);
+        registrarRadio.setToggleGroup(userTypeGroup);
 
         HBox row1 = new HBox();
         row1.setSpacing(10);
@@ -88,15 +95,20 @@ public class SignUp {
         row9.setSpacing(10);
         row9.setAlignment(Pos.CENTER);
 
+        HBox row10 = new HBox();
+        row10.setSpacing(10);
+        row10.setAlignment(Pos.CENTER);
+
         row1.getChildren().addAll(header);
         row2.getChildren().addAll(nameLabel, name);
         row3.getChildren().addAll(emailLabel, email);
         row4.getChildren().addAll(passLabel, password);
         row5.getChildren().addAll(rePassLabel, rePass);
         row6.getChildren().addAll(termsCheck);
-        row7.getChildren().addAll(signupBtn);
-        row8.getChildren().addAll(error);
-        row9.getChildren().addAll(loginLabel, loginBtn);
+        row7.getChildren().addAll(applicantRadio, registrarRadio);
+        row8.getChildren().addAll(signupBtn);
+        row9.getChildren().addAll(error);
+        row10.getChildren().addAll(loginLabel, loginBtn);
 
         grid = new GridPane();
         grid.setAlignment(javafx.geometry.Pos.CENTER);
@@ -113,22 +125,29 @@ public class SignUp {
         grid.add(row7,0,6);
         grid.add(row8,0,7);
         grid.add(row9,0,8);
+        grid.add(row10,0,9);
 
         signupBtn.setOnAction(actionEvent -> {
             if (name.getText().isEmpty() || email.getText().isEmpty() || password.getText().isEmpty() || rePass.getText().isEmpty() || !termsCheck.isSelected()) {
+                error.setText("Fields should not be empty");
                 error.setVisible(true);
             } else if (!password.getText().equals(rePass.getText())) {
                 error.setText("Password Mismatch");
                 error.setVisible(true);
+            } else if (userTypeGroup.getSelectedToggle() == null) {
+                error.setText("Please select user type");
+                error.setVisible(true);
             } else {
-                // Insert values into the database
+                String userType = ((RadioButton) userTypeGroup.getSelectedToggle()).getText();
                 try {
-                    if (insertUser(name.getText(), email.getText(), password.getText())) {
-                        // If insertion is successful, show registration page
-                        Main.showRegistrationPage();
+                    if (insertUser(name.getText(), email.getText(), password.getText(), userType)) {
+                        if(userType.equals("Applicant")) {
+                            Main.showRegistrationPage();
+                        } else {
+                            Main.showRegistrationRegistrarPage();
+                        }
                         error.setVisible(false);
                     } else {
-                        // If insertion fails, show an error message
                         Alert alert = new Alert(Alert.AlertType.ERROR);
                         alert.setTitle("Error");
                         alert.setHeaderText(null);
@@ -141,9 +160,9 @@ public class SignUp {
             }
         });
 
+
         loginBtn.setOnAction(actionEvent -> {
             Main.showLoginPage();
-
         });
     }
 
@@ -151,24 +170,24 @@ public class SignUp {
         return grid;
     }
 
-
     public void setLoginAction(Runnable loginAction) {
         this.loginAction = loginAction;
     }
+
     public void setRegistrationAction(Runnable registrationAction) {
         this.registrationAction = registrationAction;
     }
 
-    private boolean insertUser(String name, String email, String password) throws SQLException {
-        String sql = "INSERT INTO user_id (Username, EmailAddress, Password) VALUES (?, ?, ?)";
+    private boolean insertUser(String name, String email, String password, String userType) throws SQLException {
+        String sql = "INSERT INTO user_id (Username, EmailAddress, Password, UserType) VALUES (?, ?, ?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, name);
             statement.setString(2, email);
             statement.setString(3, password);
+            statement.setString(4, userType);
 
             int rowsInserted = statement.executeUpdate();
             return rowsInserted > 0;
         }
     }
 }
-

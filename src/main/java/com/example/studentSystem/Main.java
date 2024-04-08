@@ -50,6 +50,12 @@ public class Main extends Application {
         stage.show();
     }
 
+    public static void showRegistrationRegistrarPage() {
+        RegistrationRegistrar register = new RegistrationRegistrar();
+        Scene scene = new Scene(register.getView());
+        stage.setScene(scene);
+        stage.show();
+    }
     public static void showRegistrarDashboardPage(UserData userData) {
         RegistrarDashboard registrar = new RegistrarDashboard(userData);
         Scene scene = new Scene(registrar.getView());
@@ -70,6 +76,7 @@ public class Main extends Application {
         stage.setScene(scene);
         stage.show();
     }
+
 
     public static void main(String[] args) {
         launch();
