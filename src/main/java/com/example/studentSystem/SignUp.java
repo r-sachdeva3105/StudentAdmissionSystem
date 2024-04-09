@@ -23,7 +23,7 @@ public class SignUp {
         Label header = new Label("Sign Up");
         header.setFont(Font.font("Tahoma", FontWeight.BOLD, 20));
 
-        Label nameLabel = new Label("Name: ");
+        Label nameLabel = new Label("Username: ");
         nameLabel.setPrefWidth(120);
         TextField name = new TextField();
         name.setPrefWidth(200);

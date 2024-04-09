@@ -22,6 +22,7 @@ public class AdminDashboard {
     Text program1;
     Text program2;
     Text program3;
+    String currentUser;
 
     public AdminDashboard(UserData userData) {
 
@@ -66,6 +67,7 @@ public class AdminDashboard {
 //            }
 //        });
         filter.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            currentUser = newValue;
             try {
                 ObservableList<Applicant> applicantsList = getApplicantsFromDatabase(newValue);
                 applicantView.setItems(applicantsList);
@@ -76,6 +78,7 @@ public class AdminDashboard {
 
         try {
             ObservableList<Applicant> applicantsList = getApplicantsFromDatabase("Registrars");
+            currentUser = "Registrars";
             applicantView.setItems(applicantsList);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -287,10 +290,10 @@ public class AdminDashboard {
             if (selectedApplicant != null) {
                 int applicantID = selectedApplicant.getApplicantID().get();
 
-                filter.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+//                filter.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
 
                     try {
-                        deleteApplicantFromDatabase(applicantID, newValue);
+                        deleteApplicantFromDatabase(applicantID, currentUser);
 
                         applicantView.getItems().remove(selectedApplicant);
 
@@ -308,7 +311,7 @@ public class AdminDashboard {
                         alert.showAndWait();
                         System.out.println("Failed to delete user.");
                     }
-                });
+//                });
             } else {
                 Alert alert = new Alert(Alert.AlertType.WARNING);
                 alert.setTitle("Select User");
@@ -391,9 +394,17 @@ public class AdminDashboard {
     }
 
     private void deleteApplicantFromDatabase(int applicantID, String newValue) throws SQLException {
-        String tableName = newValue.equals("Applicants") ? "applicants" : "registrar";
+        String tableName = newValue.equals("applicants") ? "applicants" : "registrar";
+        System.out.println(newValue);
+//        String tableName = "applicants";
+        System.out.println(tableName);
         System.out.println(applicantID);
-        String sql = "DELETE FROM applicants WHERE ID = ?";
+        String sql1 = "DELETE FROM " + tableName + " WHERE ID = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql1)) {
+            statement.setInt(1, applicantID);
+            statement.executeUpdate();
+        }
+        String sql = "DELETE FROM user_id WHERE ID = ?";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, applicantID);
             statement.executeUpdate();
