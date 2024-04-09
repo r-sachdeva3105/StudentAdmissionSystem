@@ -1,6 +1,7 @@
 package com.example.studentSystem;
 
 import javafx.geometry.Insets;
+import javafx.print.PrinterJob;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
@@ -10,14 +11,20 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 
+import java.io.File;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import javafx.stage.FileChooser;
+
 
 public class ApplicantDashboard {
 
     private final GridPane grid;
     private Runnable logoutAction;
+
+    private Text imagePathText;
+
 
     public ApplicantDashboard(UserData userData) {
         Label header = new Label("Hi, " + userData.getName());
@@ -28,6 +35,9 @@ public class ApplicantDashboard {
         logoutBtn.setMinWidth(80);
 
         ImageView applicantImg = new ImageView();
+
+        imagePathText = new Text();
+        imagePathText.setWrappingWidth(400);
 
         Text name = new Text();
         name.setWrappingWidth(200);
@@ -96,9 +106,41 @@ public class ApplicantDashboard {
         grid.add(row3,0,2);
         grid.add(row4,0,3);
         grid.add(row5,0,4);
+        grid.add(imagePathText, 0, 5); // Add below the other rows
+
+
+
 
         logoutBtn.setOnAction(actionEvent -> {
             Main.showLoginPage();
+        });
+
+        printBtn.setOnAction(event -> printDetails());
+
+        uploadBtn.setOnAction(actionEvent -> {
+            // Create a FileChooser
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Select Image File");
+            fileChooser.getExtensionFilters().addAll(
+                    new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif")
+            );
+
+            // Show the file chooser dialog
+            File selectedFile = fileChooser.showOpenDialog(uploadBtn.getScene().getWindow());
+
+            // If the user selects a file
+            if (selectedFile != null) {
+                // Get the selected file path
+                String imagePath = ((File) selectedFile).getAbsolutePath();
+
+                // Update the imagePath column in the applicants table
+                try {
+                    updateImagePath(userData.getId(), imagePath);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    // Handle the exception
+                }
+            }
         });
 
         // Fetch and display applicant data
@@ -117,8 +159,34 @@ public class ApplicantDashboard {
         }
     }
 
+    private void printDetails() {
+        PrinterJob printerJob = PrinterJob.createPrinterJob();
+        if (printerJob != null && printerJob.showPrintDialog(grid.getScene().getWindow())) {
+            boolean success = printerJob.printPage(grid);
+            if (success) {
+                printerJob.endJob();
+            } else {
+                System.out.println("Printing failed.");
+            }
+        } else {
+            System.out.println("Printer dialog canceled.");
+        }
+    }
+
     public GridPane getView() {
         return grid;
+    }
+
+    private void updateImagePath(int userID, String imagePath) throws SQLException {
+        String sql = "UPDATE applicants SET imagePath = ? WHERE ID = ?";
+        try (PreparedStatement statement = Main.connection.prepareStatement(sql)) {
+            statement.setString(1, imagePath);
+            statement.setInt(2, userID);
+            statement.executeUpdate();
+
+            imagePathText.setText("Uploaded Image Path: " + imagePath);
+
+        }
     }
 
     private Applicant getApplicantData(int userID) throws SQLException {
