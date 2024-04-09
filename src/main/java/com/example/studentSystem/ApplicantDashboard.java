@@ -16,7 +16,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import javafx.stage.FileChooser;
-
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class ApplicantDashboard {
 
@@ -115,7 +118,7 @@ public class ApplicantDashboard {
             Main.showLoginPage();
         });
 
-        printBtn.setOnAction(event -> printDetails());
+        printBtn.setOnAction(event -> printDetails(userData.getId()));
 
         uploadBtn.setOnAction(actionEvent -> {
             // Create a FileChooser
@@ -159,19 +162,54 @@ public class ApplicantDashboard {
         }
     }
 
-    private void printDetails() {
-        PrinterJob printerJob = PrinterJob.createPrinterJob();
-        if (printerJob != null && printerJob.showPrintDialog(grid.getScene().getWindow())) {
-            boolean success = printerJob.printPage(grid);
-            if (success) {
-                printerJob.endJob();
-            } else {
-                System.out.println("Printing failed.");
+
+
+    private void printDetails(int id) {
+        try {
+            Applicant applicant = getApplicantData(id);
+
+            // Format the data
+            StringBuilder message = new StringBuilder();
+            message.append("<html><head><title>Student Registration Management System</title>");
+            message.append("<style>body { font-family: Calibri, sans-serif; text-align: center; background-image: url('background.jpg'); background-size: 40%; background-repeat: no-repeat; background-position: center top; padding-top: 4em; } table { margin: auto; } th:nth-child(1), td:nth-child(1) { width: 1.5in; } </style>");
+            message.append("</head><body>");
+            message.append("<h2>Student Registration Management System</h2>");
+            message.append("<h3>Academic registration report generated ").append(java.time.LocalDate.now()).append("</h3>");
+            message.append("<table border='1' style='margin: auto;'>"); // Add style for centering the table
+            message.append("<tr><td>Name</td><td>").append(applicant.getApplicantName().get()).append("</td></tr>");
+            message.append("<tr><td>Email</td><td>").append(applicant.getApplicantEmail().get()).append("</td></tr>");
+            message.append("<tr><td>Phone</td><td>").append(applicant.getApplicantPhone().get()).append("</td></tr>");
+            message.append("<tr><td>Date of Birth</td><td>").append(applicant.getDob().get()).append("</td></tr>");
+            message.append("<tr><td>Gender</td><td>").append(applicant.getGender().get()).append("</td></tr>");
+            message.append("<tr><td>Program 1</td><td>").append(applicant.getProgram1().get()).append("</td></tr>");
+            message.append("<tr><td>Program 2</td><td>").append(applicant.getProgram2().get()).append("</td></tr>");
+            message.append("<tr><td>Program 3</td><td>").append(applicant.getProgram3().get()).append("</td></tr>");
+            message.append("</table></body></html>");
+
+            // Generate the file name
+            String fileName = applicant.getApplicantName().get() + "_Date_" + java.time.LocalDate.now() + "_Academic_Registration.html";
+
+            // Write the data to an HTML file
+            try (FileWriter writer = new FileWriter(fileName)) {
+                writer.write(message.toString());
+            } catch (IOException e) {
+                e.printStackTrace();
+                // Handle the exception
             }
-        } else {
-            System.out.println("Printer dialog canceled.");
+
+            // Show an alert
+            Alert alert = new Alert(AlertType.INFORMATION);
+            alert.setTitle("Applicant Details");
+            alert.setHeaderText("Applicant Information");
+            alert.setContentText("Data has been written to " + fileName);
+            alert.showAndWait();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            // Handle the exception
         }
     }
+
+
 
     public GridPane getView() {
         return grid;

@@ -101,6 +101,7 @@ public class Login {
                     if (userData != null) {
                         error.setVisible(false);
                         String userType = userData.getUserType();
+                        System.out.println(userType);
                         if ("applicant".equals(userType)) {
                             Main.showApplicantDashboardPage(userData);
                         } else if ("registrar".equals(userType)) {
@@ -151,4 +152,3 @@ public class Login {
     }
 
 }
-
