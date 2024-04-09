@@ -287,18 +287,34 @@ public class AdminDashboard {
             if (selectedApplicant != null) {
                 int applicantID = selectedApplicant.getApplicantID().get();
 
-                try {
-                    deleteApplicantFromDatabase(applicantID);
+                filter.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
 
-                    applicantView.getItems().remove(selectedApplicant);
+                    try {
+                        deleteApplicantFromDatabase(applicantID, newValue);
 
-                    System.out.println("Applicant deleted successfully.");
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    System.out.println("Failed to delete applicant.");
-                }
+                        applicantView.getItems().remove(selectedApplicant);
+
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                        alert.setTitle("User Deleted");
+                        alert.setHeaderText("User Information Deleted Successfully");
+                        alert.showAndWait();
+
+                        System.out.println("User deleted successfully.");
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setTitle("Error");
+                        alert.setHeaderText("Error Deleting User");
+                        alert.showAndWait();
+                        System.out.println("Failed to delete user.");
+                    }
+                });
             } else {
-                System.out.println("No applicant selected.");
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Select User");
+                alert.setHeaderText("No user Selected");
+                alert.showAndWait();
+                System.out.println("No user selected.");
             }
         });
 
@@ -374,7 +390,9 @@ public class AdminDashboard {
         }
     }
 
-    private void deleteApplicantFromDatabase(int applicantID) throws SQLException {
+    private void deleteApplicantFromDatabase(int applicantID, String newValue) throws SQLException {
+        String tableName = newValue.equals("Applicants") ? "applicants" : "registrar";
+        System.out.println(applicantID);
         String sql = "DELETE FROM applicants WHERE ID = ?";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, applicantID);

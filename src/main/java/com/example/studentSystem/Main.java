@@ -33,6 +33,7 @@ public class Main extends Application {
         Login login = new Login(connection);
         Scene scene = new Scene(login.getView());
         stage.setScene(scene);
+        stage.setTitle("Student Admission System - Login");
         stage.show();
     }
 
@@ -40,6 +41,7 @@ public class Main extends Application {
         SignUp signup = new SignUp();
         Scene scene = new Scene(signup.getView());
         stage.setScene(scene);
+        stage.setTitle("Student Admission System - Signup");
         stage.show();
     }
 
@@ -47,6 +49,7 @@ public class Main extends Application {
         Registration registration = new Registration(id);
         Scene scene = new Scene(registration.getView());
         stage.setScene(scene);
+        stage.setTitle("Student Admission System - Applicant Registration");
         stage.show();
     }
 
@@ -54,12 +57,14 @@ public class Main extends Application {
         RegistrationRegistrar register = new RegistrationRegistrar(id);
         Scene scene = new Scene(register.getView());
         stage.setScene(scene);
+        stage.setTitle("Student Admission System - Registrar Registration");
         stage.show();
     }
     public static void showRegistrarDashboardPage(UserData userData) {
         RegistrarDashboard registrar = new RegistrarDashboard(userData);
         Scene scene = new Scene(registrar.getView());
         stage.setScene(scene);
+        stage.setTitle("Student Admission System - Registrar");
         stage.show();
     }
 
@@ -67,6 +72,7 @@ public class Main extends Application {
         AdminDashboard admin = new AdminDashboard(userData);
         Scene scene = new Scene(admin.getView());
         stage.setScene(scene);
+        stage.setTitle("Student Admission System - Admin");
         stage.show();
     }
 
@@ -74,6 +80,7 @@ public class Main extends Application {
         ApplicantDashboard applicant = new ApplicantDashboard(userData);
         Scene scene = new Scene(applicant.getView());
         stage.setScene(scene);
+        stage.setTitle("Student Admission System - Applicant");
         stage.show();
     }
 

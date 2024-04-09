@@ -22,7 +22,7 @@ public class RegistrationRegistrar {
     private final GridPane grid;
 
     public RegistrationRegistrar(int id) {
-        Label header = new Label("Registration");
+        Label header = new Label("Registrar Registration");
         header.setFont(Font.font("Tahoma", FontWeight.BOLD, 20));
 
         Label nameLabel = new Label("Full Name: ");
@@ -176,10 +176,11 @@ public class RegistrationRegistrar {
         return grid;
     }
 
-    private boolean insertRegistrar(int id, String name, String email, String phone,
-                                    Date dob, String gender,
-                                    String street, String city, String country) throws SQLException {
+    public boolean insertRegistrar(int id, String name, String email, String phone,
+                                   Date dob, String gender,
+                                   String street, String city, String country) throws SQLException {
 
+        // Split the name into first name and last name
         String[] nameParts = name.split("\\s+", 2);
         String firstName = "";
         String lastName = "";
@@ -189,28 +190,33 @@ public class RegistrationRegistrar {
                 lastName = nameParts[1];
             }
         }
+
         try {
+            // Insert into user_id table
             String sql1 = "INSERT INTO user_id (Username, EmailAddress, Password, UserType) VALUES (?, ?, ?, ?)";
             try (PreparedStatement statement = connection.prepareStatement(sql1)) {
-                statement.setString(1, name);
+                statement.setString(1, name);  // Use the full name as the username
                 statement.setString(2, email);
-                statement.setString(3, "a");
+                statement.setString(3, "a");   // Default password (you may want to change this)
                 statement.setString(4, "registrar");
 
+                // Execute the query to insert into user_id table
                 int rowsInserted = statement.executeUpdate();
-                return rowsInserted > 0;
+                if (rowsInserted == 0) {
+                    return false; // Insertion failed
+                }
             }
-        } catch (Exception e) {
-            System.out.println(e);
+        } catch (SQLException e) {
+            // Handle any SQL exceptions
+            e.printStackTrace();
+            return false;
         }
 
-        int rowsInserted = 0;
-
         try {
-            System.out.println(id + name);
+            System.out.println(id);
+            // Insert into registrar table
             String sql = "INSERT INTO registrar (ID, firstName, lastName, emailAddress, phoneNumber, dob, gender, street, city, country) " +
                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
                 // Set values for each parameter in the SQL query
                 statement.setInt(1, id);
@@ -225,16 +231,16 @@ public class RegistrationRegistrar {
                 statement.setString(10, country);
 
                 // Execute the SQL query and get the number of rows affected
-                rowsInserted = statement.executeUpdate();
+                int rowsInserted = statement.executeUpdate();
 
                 // Return true if at least one row is inserted, false otherwise
                 return rowsInserted > 0;
             }
-        } catch (Exception e) {
-            System.out.println(e);
+        } catch (SQLException e) {
+            // Handle any SQL exceptions
+            e.printStackTrace();
+            return false;
         }
-        return rowsInserted > 0;
-
     }
 }
 
