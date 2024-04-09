@@ -61,8 +61,13 @@ public class RegistrarDashboard {
         }
 
         Label program1Label = new Label("Program 1:");
+        program1Label.setPrefWidth(100);
+
         Label program2Label = new Label("Program 2:");
+        program2Label.setPrefWidth(100);
+
         Label program3Label = new Label("Program 3:");
+        program3Label.setPrefWidth(100);
 
         program1 = new Text();
         program1.setWrappingWidth(100);
