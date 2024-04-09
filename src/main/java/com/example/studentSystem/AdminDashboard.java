@@ -201,6 +201,14 @@ public class AdminDashboard {
         logoutBtn.setOnAction(actionEvent -> {
             Main.showLoginPage();
         });
+
+        addApplicantBtn.setOnAction(actionEvent -> {
+            Main.showRegistrationPage();
+        });
+
+        addRegistrarBtn.setOnAction(actionEvent -> {
+            Main.showRegistrationRegistrarPage();
+        });
         submitBtn.setOnAction(actionEvent -> {
             Applicant selectedApplicant = applicantView.getSelectionModel().getSelectedItem();
 
