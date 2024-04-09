@@ -12,7 +12,7 @@ import java.sql.SQLException;
 public class Main extends Application {
     public static final String DATABASE_NAME = "student_db";
     public static final String DB_USERNAME = "root";
-    public static final String DB_PASSWORD = "hello123";
+    public static final String DB_PASSWORD = "jdbc3306";
     public static final String URL = "jdbc:mysql://localhost:3306/" + DATABASE_NAME;
     private static Stage stage;
     public static Connection connection;
@@ -43,15 +43,15 @@ public class Main extends Application {
         stage.show();
     }
 
-    public static void showRegistrationPage() {
-        Registration registration = new Registration();
+    public static void showRegistrationPage(int id) {
+        Registration registration = new Registration(id);
         Scene scene = new Scene(registration.getView());
         stage.setScene(scene);
         stage.show();
     }
 
-    public static void showRegistrationRegistrarPage() {
-        RegistrationRegistrar register = new RegistrationRegistrar();
+    public static void showRegistrationRegistrarPage(int id) {
+        RegistrationRegistrar register = new RegistrationRegistrar(id);
         Scene scene = new Scene(register.getView());
         stage.setScene(scene);
         stage.show();

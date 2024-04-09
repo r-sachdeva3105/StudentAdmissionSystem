@@ -3,6 +3,7 @@ package com.example.studentSystem;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -126,7 +127,7 @@ public class RegistrarDashboard {
         row6.getChildren().addAll(status, submitBtn);
 
         grid = new GridPane();
-        grid.setAlignment(javafx.geometry.Pos.CENTER);
+        grid.setAlignment(Pos.CENTER);
         grid.setHgap(10);
         grid.setVgap(10);
         grid.setPadding(new Insets(25, 25, 25, 25));
@@ -166,7 +167,32 @@ public class RegistrarDashboard {
 
 
         addBtn.setOnAction(actionEvent -> {
-            Main.showRegistrationPage(); // Direct to the registration page
+            String sql = "SELECT * FROM user_id ORDER BY ID DESC LIMIT 1";
+            // Create a PreparedStatement
+            PreparedStatement statement = null;
+            try {
+                statement = connection.prepareStatement(sql);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+            // Execute the query and get the result set
+            ResultSet resultSet = null;
+            try {
+                resultSet = statement.executeQuery();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+            int id = 0;
+            try {
+                if (resultSet.next()) {
+                    id = resultSet.getInt("ID");
+                } else {
+                    System.out.println("No rows found in the table.");
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+            Main.showRegistrationPage(id + 1); // Direct to the registration page
         });
 
         deleteBtn.setOnAction(actionEvent -> {

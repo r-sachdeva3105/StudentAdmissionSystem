@@ -21,7 +21,7 @@ import static com.example.studentSystem.Main.connection;
 public class RegistrationRegistrar {
     private final GridPane grid;
 
-    public RegistrationRegistrar() {
+    public RegistrationRegistrar(int id) {
         Label header = new Label("Registration");
         header.setFont(Font.font("Tahoma", FontWeight.BOLD, 20));
 
@@ -142,7 +142,7 @@ public class RegistrationRegistrar {
                     Date sqlDate = Date.valueOf(dob.getValue());
 
                     // Call insertApplicant method
-                    if (insertRegistrar(name.getText(), email.getText(), phone.getText(),
+                    if (insertRegistrar(id, name.getText(), email.getText(), phone.getText(),
                             sqlDate, gender.getValue(),
                             street.getText(), city.getText(), country.getValue())) {
                         // If insertion is successful, show a success message
@@ -176,11 +176,11 @@ public class RegistrationRegistrar {
         return grid;
     }
 
-    private boolean insertRegistrar(String name, String email, String phone,
+    private boolean insertRegistrar(int id, String name, String email, String phone,
                                     Date dob, String gender,
                                     String street, String city, String country) throws SQLException {
 
-        String[] nameParts = name.split("\\s+", 2); // Split at the first occurrence of whitespace
+        String[] nameParts = name.split("\\s+", 2);
         String firstName = "";
         String lastName = "";
         if (nameParts.length > 0) {
@@ -189,28 +189,52 @@ public class RegistrationRegistrar {
                 lastName = nameParts[1];
             }
         }
-        // SQL query to insert data into the applicants table
-        String sql = "INSERT INTO registrar (firstName, lastName, emailAddress, phoneNumber, dob, gender, street, city, country) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        try {
+            String sql1 = "INSERT INTO user_id (Username, EmailAddress, Password, UserType) VALUES (?, ?, ?, ?)";
+            try (PreparedStatement statement = connection.prepareStatement(sql1)) {
+                statement.setString(1, name);
+                statement.setString(2, email);
+                statement.setString(3, "a");
+                statement.setString(4, "registrar");
 
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            // Set values for each parameter in the SQL query
-            statement.setString(1, firstName);
-            statement.setString(2, lastName);
-            statement.setString(3, email);
-            statement.setString(4, phone);
-            statement.setDate(5, dob);
-            statement.setString(6, gender);
-            statement.setString(7, street);
-            statement.setString(8, city);
-            statement.setString(9, country);
-
-            // Execute the SQL query and get the number of rows affected
-            int rowsInserted = statement.executeUpdate();
-
-            // Return true if at least one row is inserted, false otherwise
-            return rowsInserted > 0;
+                int rowsInserted = statement.executeUpdate();
+                return rowsInserted > 0;
+            }
+        } catch (Exception e) {
+            System.out.println(e);
         }
+
+        int rowsInserted = 0;
+
+        try {
+            System.out.println(id + name);
+            String sql = "INSERT INTO registrar (ID, firstName, lastName, emailAddress, phoneNumber, dob, gender, street, city, country) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                // Set values for each parameter in the SQL query
+                statement.setInt(1, id);
+                statement.setString(2, firstName);
+                statement.setString(3, lastName);
+                statement.setString(4, email);
+                statement.setString(5, phone);
+                statement.setDate(6, dob);
+                statement.setString(7, gender);
+                statement.setString(8, street);
+                statement.setString(9, city);
+                statement.setString(10, country);
+
+                // Execute the SQL query and get the number of rows affected
+                rowsInserted = statement.executeUpdate();
+
+                // Return true if at least one row is inserted, false otherwise
+                return rowsInserted > 0;
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return rowsInserted > 0;
+
     }
 }
 

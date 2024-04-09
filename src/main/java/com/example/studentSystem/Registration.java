@@ -21,7 +21,7 @@ import static com.example.studentSystem.Main.connection;
 public class Registration {
     private final GridPane grid;
 
-    public Registration() {
+    public Registration(int id) {
         Label header = new Label("Registration");
         header.setFont(Font.font("Tahoma", FontWeight.BOLD, 20));
 
@@ -180,7 +180,7 @@ public class Registration {
                     Date sqlDate = Date.valueOf(dob.getValue());
 
                     // Call insertApplicant method
-                    if (insertApplicant(name.getText(), email.getText(), phone.getText(),
+                    if (insertApplicant(id, name.getText(), email.getText(), phone.getText(),
                             sqlDate, gender.getValue(), gpa.getText(),
                             street.getText(), city.getText(), country.getValue(),
                             program1.getValue(), program2.getValue(), program3.getValue())) {
@@ -234,7 +234,7 @@ public class Registration {
     }
 
 
-    private boolean insertApplicant(String name, String email, String phone,
+    private boolean insertApplicant(int id, String name, String email, String phone,
                                     Date dob, String gender, String gpa,
                                     String street, String city, String country,
                                     String program1, String program2, String program3) throws SQLException {
@@ -249,24 +249,25 @@ public class Registration {
             }
         }
         // SQL query to insert data into the applicants table
-        String sql = "INSERT INTO applicants (firstName, lastName, emailAddress, phoneNumber, dob, gender, gpa, street, city, country, fieldOfStudy1, fieldOfStudy2, fieldOfStudy3) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO applicants (ID, firstName, lastName, emailAddress, phoneNumber, dob, gender, gpa, street, city, country, fieldOfStudy1, fieldOfStudy2, fieldOfStudy3) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             // Set values for each parameter in the SQL query
-            statement.setString(1, firstName);
-            statement.setString(2, lastName);
-            statement.setString(3, email);
-            statement.setString(4, phone);
-            statement.setDate(5, dob);
-            statement.setString(6, gender);
-            statement.setString(7, gpa);
-            statement.setString(8, street);
-            statement.setString(9, city);
-            statement.setString(10, country);
-            statement.setString(11, program1);
-            statement.setString(12, program2);
-            statement.setString(13, program3);
+            statement.setInt(1, id);
+            statement.setString(2, firstName);
+            statement.setString(3, lastName);
+            statement.setString(4, email);
+            statement.setString(5, phone);
+            statement.setDate(6, dob);
+            statement.setString(7, gender);
+            statement.setString(8, gpa);
+            statement.setString(9, street);
+            statement.setString(10, city);
+            statement.setString(11, country);
+            statement.setString(12, program1);
+            statement.setString(13, program2);
+            statement.setString(14, program3);
 
             // Execute the SQL query and get the number of rows affected
             int rowsInserted = statement.executeUpdate();

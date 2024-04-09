@@ -203,11 +203,61 @@ public class AdminDashboard {
         });
 
         addApplicantBtn.setOnAction(actionEvent -> {
-            Main.showRegistrationPage();
+            String sql = "SELECT * FROM user_id ORDER BY ID DESC LIMIT 1";
+            // Create a PreparedStatement
+            PreparedStatement statement = null;
+            try {
+                statement = connection.prepareStatement(sql);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+            // Execute the query and get the result set
+            ResultSet resultSet = null;
+            try {
+                resultSet = statement.executeQuery();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+            int id = 0;
+            try {
+                if (resultSet.next()) {
+                    id = resultSet.getInt("ID");
+                } else {
+                    System.out.println("No rows found in the table.");
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+            Main.showRegistrationPage(id + 1);
         });
 
         addRegistrarBtn.setOnAction(actionEvent -> {
-            Main.showRegistrationRegistrarPage();
+            String sql = "SELECT * FROM user_id ORDER BY ID DESC LIMIT 1";
+            // Create a PreparedStatement
+            PreparedStatement statement = null;
+            try {
+                statement = connection.prepareStatement(sql);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+            // Execute the query and get the result set
+            ResultSet resultSet = null;
+            try {
+                resultSet = statement.executeQuery();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+            int id = 0;
+            try {
+                if (resultSet.next()) {
+                    id = resultSet.getInt("ID");
+                } else {
+                    System.out.println("No rows found in the table.");
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+            Main.showRegistrationRegistrarPage(id + 1);
         });
         submitBtn.setOnAction(actionEvent -> {
             Applicant selectedApplicant = applicantView.getSelectionModel().getSelectedItem();
@@ -298,6 +348,7 @@ public class AdminDashboard {
     }
 
     private void getApplicantPrograms(int applicantID) throws SQLException {
+        System.out.println(applicantID);
         String sql = "SELECT fieldOfStudy1, fieldOfStudy2, fieldOfStudy3 FROM applicants WHERE ID = ?";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, applicantID);
