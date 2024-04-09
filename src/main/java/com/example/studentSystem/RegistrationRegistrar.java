@@ -25,7 +25,7 @@ public class RegistrationRegistrar {
         Label header = new Label("Registration");
         header.setFont(Font.font("Tahoma", FontWeight.BOLD, 20));
 
-        Label nameLabel = new Label("Name: ");
+        Label nameLabel = new Label("Full Name: ");
         nameLabel.setPrefWidth(120);
         nameLabel.setAlignment(Pos.CENTER_RIGHT);
         TextField name = new TextField();
