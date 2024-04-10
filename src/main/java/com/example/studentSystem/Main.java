@@ -53,13 +53,14 @@ public class Main extends Application {
         stage.show();
     }
 
-    public static void showRegistrationRegistrarPage(int id) {
-        RegistrationRegistrar register = new RegistrationRegistrar(id);
+    public static void showRegistrationRegistrarPage(int id, UserData userData) {
+        RegistrationRegistrar register = new RegistrationRegistrar(id, userData);
         Scene scene = new Scene(register.getView());
         stage.setScene(scene);
         stage.setTitle("Student Admission System - Registrar Registration");
         stage.show();
     }
+
     public static void showRegistrarDashboardPage(UserData userData) {
         RegistrarDashboard registrar = new RegistrarDashboard(userData);
         Scene scene = new Scene(registrar.getView());
@@ -83,6 +84,15 @@ public class Main extends Application {
         stage.setTitle("Student Admission System - Applicant");
         stage.show();
     }
+
+    public static void showUpdateApplicantPage(int id, UserData userData) {
+        UpdateApplicant update = new UpdateApplicant(id, userData);
+        Scene scene = new Scene(update.getView());
+        stage.setScene(scene);
+        stage.setTitle("Student Admission System - Update Applicant");
+        stage.show();
+    }
+
 
 
     public static void main(String[] args) {

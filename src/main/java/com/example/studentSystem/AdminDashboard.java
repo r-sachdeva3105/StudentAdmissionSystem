@@ -11,6 +11,8 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -234,6 +236,16 @@ public class AdminDashboard {
             Main.showRegistrationPage(id + 1);
         });
 
+        reportBtn.setOnAction(actionEvent -> {
+            Applicant selectedApplicant = applicantView.getSelectionModel().getSelectedItem();
+            if (selectedApplicant != null) {
+                int applicantID = selectedApplicant.getApplicantID().get();
+                generateReport(applicantID);
+            } else {
+                System.out.println("No applicant selected.");
+            }
+        });
+
         addRegistrarBtn.setOnAction(actionEvent -> {
             String sql = "SELECT * FROM user_id ORDER BY ID DESC LIMIT 1";
             // Create a PreparedStatement
@@ -260,7 +272,7 @@ public class AdminDashboard {
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
-            Main.showRegistrationRegistrarPage(id + 1);
+            Main.showRegistrationRegistrarPage(id + 1, userData);
         });
         submitBtn.setOnAction(actionEvent -> {
             Applicant selectedApplicant = applicantView.getSelectionModel().getSelectedItem();
@@ -321,6 +333,18 @@ public class AdminDashboard {
             }
         });
 
+        updateBtn.setOnAction(actionEvent -> {
+            Applicant selectedApplicant = applicantView.getSelectionModel().getSelectedItem();
+            if (selectedApplicant != null) {
+                int applicantID = selectedApplicant.getApplicantID().get();
+                try {
+                    Main.showUpdateApplicantPage(applicantID, userData);
+                } catch (Exception e ) {
+                    System.out.println(e);
+                }
+            }
+        });
+
     }
 
 
@@ -365,7 +389,76 @@ public class AdminDashboard {
             return applicantsList;
         }
     }
+    private Applicant getApplicantData(int userID) throws SQLException {
+        String sql = "SELECT * FROM applicants WHERE ID = ?";
+        try (PreparedStatement statement = Main.connection.prepareStatement(sql)) {
+            statement.setInt(1, userID);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    int id = resultSet.getInt("ID");
+                    String firstName = resultSet.getString("firstName");
+                    String lastName = resultSet.getString("lastName");
+                    String name = firstName + " " + lastName;
+                    String email = resultSet.getString("emailAddress");
+                    String phone = resultSet.getString("phoneNumber");
+                    String dob = resultSet.getString("dob");
+                    String gender = resultSet.getString("gender");
+                    String program1 = resultSet.getString("fieldOfStudy1");
+                    String program2 = resultSet.getString("fieldOfStudy2");
+                    String program3 = resultSet.getString("fieldOfStudy3");
+                    return new Applicant(id, name, phone, email, program1, program2, program3, dob, gender);
+                } else {
+                    throw new SQLException("No applicant found with ID: " + userID);
+                }
+            }
+        }
+    }
 
+    private void generateReport(int applicantID) {
+        try {
+            Applicant applicant = getApplicantData(applicantID);
+
+            // Format the data
+            StringBuilder message = new StringBuilder();
+            message.append("<html><head><title>Student Report</title>");
+            message.append("<style>body { font-family: Calibri, sans-serif; text-align: center; background-image: url('background.jpg'); background-size: 40%; background-repeat: no-repeat; background-position: center top; padding-top: 4em; } table { margin: auto; } th:nth-child(1), td:nth-child(1) { width: 1.5in; } </style>");
+            message.append("</head><body>");
+            message.append("<h2>Student Report</h2>");
+            message.append("<h3>Academic report for ").append(applicant.getApplicantName().get()).append("</h3>");
+            message.append("<table border='1' style='margin: auto;'>"); // Add style for centering the table
+            message.append("<tr><td>Name</td><td>").append(applicant.getApplicantName().get()).append("</td></tr>");
+            message.append("<tr><td>Email</td><td>").append(applicant.getApplicantEmail().get()).append("</td></tr>");
+            message.append("<tr><td>Phone</td><td>").append(applicant.getApplicantPhone().get()).append("</td></tr>");
+            message.append("<tr><td>Date of Birth</td><td>").append(applicant.getDob().get()).append("</td></tr>");
+            message.append("<tr><td>Gender</td><td>").append(applicant.getGender().get()).append("</td></tr>");
+            message.append("<tr><td>Program 1</td><td>").append(applicant.getProgram1().get()).append("</td></tr>");
+            message.append("<tr><td>Program 2</td><td>").append(applicant.getProgram2().get()).append("</td></tr>");
+            message.append("<tr><td>Program 3</td><td>").append(applicant.getProgram3().get()).append("</td></tr>");
+            message.append("</table></body></html>");
+
+            // Generate the file name
+            String fileName = applicant.getApplicantName().get() + "_Report.html";
+
+            // Write the data to an HTML file
+            try (FileWriter writer = new FileWriter(fileName)) {
+                writer.write(message.toString());
+            } catch (IOException e) {
+                e.printStackTrace();
+                // Handle the exception
+            }
+
+            // Show an alert
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Report Generated");
+            alert.setHeaderText("Report Information");
+            alert.setContentText("Report has been generated and saved as: " + fileName);
+            alert.showAndWait();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            // Handle the exception
+        }
+
+    };
     private void getApplicantPrograms(int applicantID) throws SQLException {
         System.out.println(applicantID);
         String sql = "SELECT fieldOfStudy1, fieldOfStudy2, fieldOfStudy3 FROM applicants WHERE ID = ?";

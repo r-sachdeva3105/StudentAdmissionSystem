@@ -251,6 +251,18 @@ public class RegistrarDashboard {
             }
         });
 
+        updateBtn.setOnAction(actionEvent -> {
+            Applicant selectedApplicant = applicantView.getSelectionModel().getSelectedItem();
+            if (selectedApplicant != null) {
+                int applicantID = selectedApplicant.getApplicantID().get();
+                try {
+                    Main.showUpdateApplicantPage(applicantID, userData);
+                } catch (Exception e ) {
+                    System.out.println(e);
+                }
+            }
+        });
+
     }
 
 

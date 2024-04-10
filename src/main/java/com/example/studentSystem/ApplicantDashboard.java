@@ -160,6 +160,23 @@ public class ApplicantDashboard {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+        updateBtn.setOnAction(actionEvent -> {
+            Applicant applicant = null;
+            try {
+                applicant = getApplicantData(userData.getId());
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+            if (applicant != null) {
+                int applicantID = applicant.getApplicantID().get();
+                try {
+                    Main.showUpdateApplicantPage(applicantID, userData);
+                } catch (Exception e ) {
+                    System.out.println(e);
+                }
+            }
+        });
     }
 
 

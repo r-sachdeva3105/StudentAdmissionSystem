@@ -21,7 +21,7 @@ import static com.example.studentSystem.Main.connection;
 public class RegistrationRegistrar {
     private final GridPane grid;
 
-    public RegistrationRegistrar(int id) {
+    public RegistrationRegistrar(int id, UserData userData) {
         Label header = new Label("Registrar Registration");
         header.setFont(Font.font("Tahoma", FontWeight.BOLD, 20));
 
@@ -149,8 +149,9 @@ public class RegistrationRegistrar {
                         Alert alert = new Alert(Alert.AlertType.INFORMATION);
                         alert.setTitle("Success");
                         alert.setHeaderText(null);
-                        alert.setContentText("Applicant registered successfully!");
+                        alert.setContentText("Registrar registered successfully!");
                         alert.showAndWait();
+                        Main.showAdminDashboardPage(userData);
                     } else {
                         // If insertion fails, show an error message
                         Alert alert = new Alert(Alert.AlertType.ERROR);
